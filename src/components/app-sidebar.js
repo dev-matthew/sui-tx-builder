@@ -16,9 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/hooks/use-toast";
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
+import { Blocks } from "@/components/blocks";
+import { Templates } from "@/components/templates";
  
-export function AppSidebar() {
+export function AppSidebar({ onAddNode }) {
   const [transactionDigest, setTransactionDigest] = useState("");
   const { toast } = useToast()
 
@@ -85,18 +87,14 @@ export function AppSidebar() {
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Basic Building Blocks (Drag and Drop)</SidebarGroupLabel>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Templates (Drag and Drop)</SidebarGroupLabel>
-        </SidebarGroup>
+        <Blocks onAddNode={onAddNode}/>
+        <Templates />
       </SidebarContent>
       <SidebarFooter>
         <div className="flex h-5 items-center space-x-4 text-sm justify-between w-full">
-          <SidebarGroupLabel><a href="https://github.com/dev-matthew/sui-tx-builder" target="_blank" className="flex items-center"><Github className="mr-2"></Github><b>Source Code</b></a></SidebarGroupLabel>
-          <Separator orientation="vertical" />
           <SidebarGroupLabel>Data provided by the&nbsp;<a href="https://blockberry.one" target="_blank"><b>Blockberry API</b></a></SidebarGroupLabel>
+          <Separator orientation="vertical" />
+          <SidebarGroupLabel><a href="https://github.com/dev-matthew/sui-tx-builder" target="_blank" className="flex items-center"><Github className="mr-2"></Github><b>Source Code</b></a></SidebarGroupLabel>
         </div>
       </SidebarFooter>
     </Sidebar>
