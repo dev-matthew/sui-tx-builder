@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Github, Link } from "lucide-react";
+import { Github } from "lucide-react";
 
 import {
   Sidebar,
@@ -96,7 +96,7 @@ export function AppSidebar() {
         <div className="flex h-5 items-center space-x-4 text-sm justify-between w-full">
           <SidebarGroupLabel><a href="https://github.com/dev-matthew/sui-tx-builder" target="_blank" className="flex items-center"><Github className="mr-2"></Github><b>Source Code</b></a></SidebarGroupLabel>
           <Separator orientation="vertical" />
-          <SidebarGroupLabel>Data provided by the&nbsp;<a href="https://blockberry.com" target="_blank"><b>Blockberry API</b></a></SidebarGroupLabel>
+          <SidebarGroupLabel>Data provided by the&nbsp;<a href="https://blockberry.one" target="_blank"><b>Blockberry API</b></a></SidebarGroupLabel>
         </div>
       </SidebarFooter>
     </Sidebar>
