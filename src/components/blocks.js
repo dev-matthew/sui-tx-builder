@@ -10,16 +10,23 @@ import {
   } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
-import { ChevronDown, Send, Parentheses } from "lucide-react";
+import { ChevronDown, Send, Parentheses, Split } from "lucide-react";
 
-const blocks = [
+export const blocks = [
     {
+        id: "TokenTransfer",
         title: "Token Transfer",
         icon: Send
     },
     {
+        id: "MoveCall",
         title: "Move Call",
         icon: Parentheses
+    },
+    {
+        id: "SplitCoins",
+        title: "Split Coins",
+        icon: Split
     }
 ]
 
@@ -37,7 +44,7 @@ export function Blocks({ onAddNode }) {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {blocks.map((item, index) => (
-                                <SidebarMenuItem key={item.title}>
+                                <SidebarMenuItem key={item.id}>
                                     <SidebarMenuButton asChild className="hover:cursor-pointer" onClick={() => onAddNode(item)}>
                                         <span><item.icon />{item.title}</span>
                                     </SidebarMenuButton>

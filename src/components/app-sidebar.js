@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Blocks } from "@/components/blocks";
 import { Templates } from "@/components/templates";
  
-export function AppSidebar({ onAddNode }) {
+export function AppSidebar({ onAddNode, onSearch }) {
   const [transactionDigest, setTransactionDigest] = useState("");
   const { toast } = useToast()
 
@@ -41,11 +41,10 @@ export function AppSidebar({ onAddNode }) {
       }
   
       const data = await response.json();
-      console.log(data);
-
       if (data.result == null) {
         throw new Error(`Error: ${response.status}`);
       }
+      onSearch(data);
     } catch (error) {
       toast({
         title: `Couldn't find ${transactionDigest}`,

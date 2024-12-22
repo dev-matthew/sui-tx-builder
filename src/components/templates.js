@@ -10,12 +10,16 @@ import {
   } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
-import { ChevronDown, FilePlus2 } from "lucide-react";
+import { ChevronDown, FilePlus2, HandCoins } from "lucide-react";
 
 const templates = [
     {
         title: "NFT Mint",
         icon: FilePlus2
+    },
+    {
+        title: "Airdrop",
+        icon: HandCoins
     }
 ]
 
