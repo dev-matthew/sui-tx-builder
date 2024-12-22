@@ -46,7 +46,7 @@ export function Blocks({ onAddNode }) {
                             {blocks.map((item, index) => (
                                 <SidebarMenuItem key={item.id}>
                                     <SidebarMenuButton asChild className="hover:cursor-pointer" onClick={() => onAddNode(item)}>
-                                        <span><item.icon />{item.title}</span>
+                                        <span><item.icon className="text-sui" />{item.title}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

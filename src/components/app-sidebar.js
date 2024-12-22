@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
-import { Github } from "lucide-react";
+import { Github, LoaderCircle } from "lucide-react";
 
 import {
   Sidebar,
@@ -21,6 +22,7 @@ import { Blocks } from "@/components/blocks";
 import { Templates } from "@/components/templates";
  
 export function AppSidebar({ onAddNode, onSearch }) {
+  const [loading, setLoading] = useState(false);
   const [transactionDigest, setTransactionDigest] = useState("");
   const { toast } = useToast()
 
@@ -29,6 +31,14 @@ export function AppSidebar({ onAddNode, onSearch }) {
   };
 
   const handleSearchClick = async () => {
+    if (loading) {
+      toast({
+        title: `Search already in progress`,
+        description: `Please wait a few seconds and try again`
+      })
+      return;
+    }
+    setLoading(true);
     try {
       const response = await fetch("/api/search", {
         method: "POST",
@@ -51,6 +61,8 @@ export function AppSidebar({ onAddNode, onSearch }) {
         description: error.message,
         variant: "destructive"
       })
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,7 +75,10 @@ export function AppSidebar({ onAddNode, onSearch }) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <SidebarGroupLabel className="font-bold text-2xl text-gray-900 mt-4">Sui Transaction Builder</SidebarGroupLabel>
+        <SidebarGroupLabel className="font-bold text-2xl text-gray-900 mt-4">
+          <Image src="/Sui_Symbol_Sea.svg" alt="Sui Logo" width={24} height={24} className="mr-4 ml-1" />
+          <span className="mt-1">Sui Transaction Builder</span>
+        </SidebarGroupLabel>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -80,8 +95,14 @@ export function AppSidebar({ onAddNode, onSearch }) {
               <Button
                 type="submit"
                 onClick={handleSearchClick}
+                disabled={loading}
+                className="bg-sui hover:bg-sui hover:brightness-110"
               >
-                Search
+                {loading ? (
+                  <LoaderCircle className="animate-spin w-5 h-5" />
+                ) : (
+                  "Search"
+                )}
               </Button>
             </div>
           </SidebarGroupContent>

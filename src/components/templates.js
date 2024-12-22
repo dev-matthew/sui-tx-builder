@@ -39,7 +39,7 @@ export function Templates() {
                             {templates.map((item, index) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild className="hover:cursor-pointer">
-                                        <span><item.icon />{item.title}</span>
+                                        <span><item.icon className="text-sui" />{item.title}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

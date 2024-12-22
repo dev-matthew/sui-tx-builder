@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Sui Transaction Builder",
-  description: "",
+  title: "Sui Tx Builder",
+  description: "Sui Transaction Builder",
 };
 
 export default function RootLayout({ children }) {
