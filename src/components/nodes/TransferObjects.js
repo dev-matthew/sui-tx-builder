@@ -36,6 +36,7 @@ const TransferObjectsNode = ({ data, selected }) => {
     <Card
       style={{
         border: selected ? "1px solid #555" : "1px solid #ddd",
+        width: "300px"
       }}
     >
       <CardHeader className="bg-sui rounded-t-[inherit] text-white mb-4 p-4">

@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { blocks } from "@/components/blocks";
 import { useToast } from "@/components/hooks/use-toast";
 
-import { ReactFlow, ReactFlowProvider, Background, Controls, Panel, ViewportPortal, useNodesState, useEdgesState, MarkerType } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Panel, ViewportPortal, useNodesState, useEdgesState, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 export default function Main() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const nodeTypes = blocks.reduce((acc, block) => {
     acc[block.id] = block.node;
@@ -26,8 +26,6 @@ export default function Main() {
     x = undefined,
     y = undefined,
     addPrevEdge = false,
-    group = undefined,
-    parentOffset = undefined,
     customData = {}
   ) => {
     setNodes((prevNodes) => {
@@ -44,24 +42,20 @@ export default function Main() {
           icon: block.icon,
           ...customData,
         },
-        type: group == undefined ? block.id : "group",
-        style: group == undefined ? {} : { zIndex: -1, width: group.width, height: group.height },
-        parentId: parentOffset == undefined ? undefined : prevNodes[prevNodes.length - 1 - parentOffset].id,
+        type: block.id,
         selectable: true,
       };
-  
-      if (parentOffset != undefined) {
-        newNode.extent = "parent";
-      }
   
       if (addPrevEdge && prevNodes.length > 0) {
         const prevNodeId = prevNodes[prevNodes.length - 1].id;
         onConnect({
           source: prevNodeId,
           target: newNodeId,
+          sourceHandle: "bottom",
+          targetHandle: "top"
         });
       }
-  
+
       return [...prevNodes, newNode];
     });
   };  
@@ -121,17 +115,8 @@ export default function Main() {
 
   const search = (data) => {
     let functions = data.result.transaction.data.transaction.transactions;
-    let x = Math.random() * 400;
-    let y = 40;
-    let group_block = {
-      id: "TransactionBlock",
-      title: "Transaction Block"
-    }
-    let group_info = {
-      height: 80 + 64 * functions.length,
-      width: 200
-    }
-    addNode(group_block, x, y, false, group_info, undefined);
+    let x = 50;
+    let y = 50;
     functions.forEach(function(func, index) {
       let id = Object.keys(func)[0];
       let block = blocks.find(block => block.id === id);
@@ -156,8 +141,8 @@ export default function Main() {
             }
             break;
         }
-        addNode(block, 50, y, index > 0, undefined, index, customData);
-        y += 64;
+        addNode(block, x, y, index > 0, customData);
+        x += 350;
       }
     });
   }
@@ -166,7 +151,7 @@ export default function Main() {
     <>
       <SidebarProvider
         style={{
-          "--sidebar-width": "26rem"
+          "--sidebar-width": "24rem"
         }}
       >
         <AppSidebar
@@ -175,7 +160,7 @@ export default function Main() {
           toast={toast}
         />
         <div className="w-full h-screen">
-          <ReactFlowProvider>
+          
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -200,7 +185,6 @@ export default function Main() {
                 </div>
               </ViewportPortal>}
             </ReactFlow>
-          </ReactFlowProvider>
         </div>
       </SidebarProvider>
     </>

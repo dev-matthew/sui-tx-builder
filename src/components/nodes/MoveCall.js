@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect } from "react";
 import { Handle, Position } from '@xyflow/react';
 import {
   Card,
@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, ShieldCheck, TriangleAlert, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,6 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const MoveCallNode = ({ data, selected }) => {
   const [packageValue, setPackageValue] = useState(data.package || "");
@@ -27,6 +38,51 @@ const MoveCallNode = ({ data, selected }) => {
   const [functionValue, setFunctionValue] = useState(data.function || "");
   const [argumentsList, setArgumentsList] = useState(data.arguments || []);
   const [outputsList, setOutputsList] = useState(data.outputs || []);
+  const [loading, setLoading] = useState(false);
+  const [packageData, setPackageData] = useState({});
+
+  const handlePackageBlur = async () => {
+    return; // Disable security check for now because too many requests
+
+    // TODO: Check if packageValue looks like a good value before making the request?
+    if (packageValue == "") {
+      setPackageData({});
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/metadata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packageValue }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log(data);
+      setPackageData({
+        name: data.projectName,
+        icon: data.projectImg,
+        security: data.securityMessage,
+        verified: data.isVerified
+      })
+    } catch (error) {
+      setPackageData({})
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Trigger the API request if a package name is initially provided
+    if (packageValue) {
+      handlePackageBlur();
+    }
+  }, [packageValue]);
 
   const addArgument = () => {
     setArgumentsList((prev) => [...prev, { type: undefined, value: "" }]);
@@ -64,6 +120,7 @@ const MoveCallNode = ({ data, selected }) => {
     <Card
       style={{
         border: selected ? "1px solid #555" : "1px solid #ddd",
+        width: "300px"
       }}
     >
       <CardHeader className="bg-sui rounded-t-[inherit] text-white mb-4 p-4">
@@ -73,108 +130,16 @@ const MoveCallNode = ({ data, selected }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Package Input */}
-        <div className="flex items-start gap-2 mb-4 relative">
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="left-package"
-            isConnectable={true}
-            style={{
-              marginTop: "10px",
-              left: "-24px", // Adjust spacing as needed
-              position: "absolute",
-              width: "10px",
-              height: "5px",
-              borderRadius: "0",
-              border: "none"
-            }}
-          />
-          <div className="flex flex-col w-full">
-            <Label className="mb-2">Package:</Label>
-            <Input
-              value={packageValue}
-              onChange={(e) => setPackageValue(e.target.value)}
-              placeholder="Enter package address..."
-            />
-          </div>
-        </div>
-
-        {/* Module Input */}
-        <div className="flex items-start gap-2 mb-4 relative">
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="left-module"
-            isConnectable={true}
-            style={{
-              marginTop: "10px",
-              left: "-24px",
-              position: "absolute",
-              width: "10px",
-              height: "5px",
-              borderRadius: "0",
-              border: "none"
-            }}
-          />
-          <div className="flex flex-col w-full">
-            <Label className="mb-2">Module:</Label>
-            <Input
-              value={moduleValue}
-              onChange={(e) => setModuleValue(e.target.value)}
-              placeholder="Enter module name..."
-            />
-          </div>
-        </div>
-
-        {/* Function Input */}
-        <div className="flex items-start gap-2 mb-4 relative">
-          <Handle
-            type="target"
-            position={Position.Left}
-            id="left-function"
-            isConnectable={true}
-            style={{
-              marginTop: "10px",
-              left: "-24px",
-              position: "absolute",
-              width: "10px",
-              height: "5px",
-              borderRadius: "0",
-              border: "none"
-            }}
-          />
-          <div className="flex flex-col w-full">
-            <Label className="mb-2">Function:</Label>
-            <Input
-              value={functionValue}
-              onChange={(e) => setFunctionValue(e.target.value)}
-              placeholder="Enter function name..."
-            />
-          </div>
-        </div>
-
-        {/* Arguments */}
-        <div className="flex items-center gap-2">
-          <Label>Arguments:</Label>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={addArgument}
-            className=""
-          >
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
-
-        {argumentsList.map((arg, index) => (
-          <div key={index} className="flex items-start gap-2 mb-2 relative">
+        <TooltipProvider>
+          {/* Package Input */}
+          <div className="flex items-start gap-2 mb-4 relative">
             <Handle
               type="target"
               position={Position.Left}
-              id={`left-argument-${index}`}
+              id="left-package"
               isConnectable={true}
               style={{
+                marginTop: "10px",
                 left: "-24px", // Adjust spacing as needed
                 position: "absolute",
                 width: "10px",
@@ -184,66 +149,61 @@ const MoveCallNode = ({ data, selected }) => {
               }}
             />
             <div className="flex flex-col w-full">
-              <div className="flex gap-2">
-                {/* Select Component for Argument Type */}
-                <Select
-                  value={arg.type}
-                  onValueChange={(value) => handleArgumentChange(value, index, "type")}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Arg Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="address">Address</SelectItem>
-                      <SelectItem value="string">String</SelectItem>
-                      <SelectItem value="integer">Integer</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                {/* Text Input for Argument Value */}
-                <Input
-                  value={arg.value}
-                  onChange={(e) => handleArgumentChange(e.target.value, index, "value")}
-                  placeholder="Enter arg value..."
-                />
+              {/* Label and Icon/Avatar on the same line */}
+              <div className="flex justify-between items-center mb-2">
+                <Label>Package:</Label>
+                {loading || packageValue == "" ? (
+                    <LoaderCircle className="animate-spin w-5 h-5" hidden={packageValue == ""} />
+                  ) : (
+                  packageData.security != null || packageData.name == null ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TriangleAlert
+                          className="h-5 w-5"
+                          style={{
+                            color: packageData.security != null ? "red" : "orange",
+                          }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {packageData.seucrity != null ? packageData.security : "Error looking up package (network error or unknown package name), please beware of scams!"}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Avatar className="h-6 w-6 text-xs">
+                          <AvatarImage src={packageData.icon} alt="@shadcn" />
+                          <AvatarFallback>0x</AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {`Known package: ${packageData.name}`}
+                      </TooltipContent>
+                    </Tooltip>
+                ))}
               </div>
+
+              {/* Input on the next line */}
+              <Input
+                value={packageValue}
+                onChange={(e) => setPackageValue(e.target.value)}
+                placeholder="Enter package address..."
+                onBlur={handlePackageBlur}
+              />
             </div>
-
-            {/* Remove Argument Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => removeArgument(index)}
-            >
-              <Trash className="w-4 h-4" />
-            </Button>
           </div>
-        ))}
 
-        {/* Outputs */}
-        <div className="flex items-center gap-2 mt-4">
-          <Label>Outputs (read only):</Label>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={addOutput}
-            className=""
-          >
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
-
-        {outputsList.map((output, index) => (
-          <div key={index} className="flex items-start gap-2 mb-2 relative">
+          {/* Module Input */}
+          <div className="flex items-start gap-2 mb-4 relative">
             <Handle
-              type="source"
-              position={Position.Right}  // Right handle for outputs
-              id={`right-output-${index}`}
+              type="target"
+              position={Position.Left}
+              id="left-module"
               isConnectable={true}
               style={{
-                right: "-24px", // Adjust spacing as needed
+                marginTop: "10px",
+                left: "-24px",
                 position: "absolute",
                 width: "10px",
                 height: "5px",
@@ -252,27 +212,163 @@ const MoveCallNode = ({ data, selected }) => {
               }}
             />
             <div className="flex flex-col w-full">
-              <div className="flex gap-2">
-                {/* Readonly Text Input for Output */}
-                <Input
-                  value={output.value}
-                  onChange={(e) => handleOutputChange(e.target.value, index)}
-                  placeholder={`Output value ${index}`}
-                  readOnly
-                />
-              </div>
+              <Label className="mb-2">Module:</Label>
+              <Input
+                value={moduleValue}
+                onChange={(e) => setModuleValue(e.target.value)}
+                placeholder="Enter module name..."
+              />
             </div>
+          </div>
 
-            {/* Remove Output Button */}
+          {/* Function Input */}
+          <div className="flex items-start gap-2 mb-4 relative">
+            <Handle
+              type="target"
+              position={Position.Left}
+              id="left-function"
+              isConnectable={true}
+              style={{
+                marginTop: "10px",
+                left: "-24px",
+                position: "absolute",
+                width: "10px",
+                height: "5px",
+                borderRadius: "0",
+                border: "none"
+              }}
+            />
+            <div className="flex flex-col w-full">
+              <Label className="mb-2">Function:</Label>
+              <Input
+                value={functionValue}
+                onChange={(e) => setFunctionValue(e.target.value)}
+                placeholder="Enter function name..."
+              />
+            </div>
+          </div>
+
+          {/* Arguments */}
+          <div className="flex items-center gap-2">
+            <Label>Arguments:</Label>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => removeOutput(index)}
+              onClick={addArgument}
+              className=""
             >
-              <Trash className="w-4 h-4" />
+              <Plus className="w-3 h-3" />
             </Button>
           </div>
-        ))}
+
+          {argumentsList.map((arg, index) => (
+            <div key={index} className="flex items-start gap-2 mb-2 relative">
+              <Handle
+                type="target"
+                position={Position.Left}
+                id={`left-argument-${index}`}
+                isConnectable={true}
+                style={{
+                  left: "-24px", // Adjust spacing as needed
+                  position: "absolute",
+                  width: "10px",
+                  height: "5px",
+                  borderRadius: "0",
+                  border: "none"
+                }}
+              />
+              <div className="flex flex-col w-full">
+                <div className="flex gap-2">
+                  {/* Select Component for Argument Type */}
+                  <Select
+                    value={arg.type}
+                    onValueChange={(value) => handleArgumentChange(value, index, "type")}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Arg Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="address">Address</SelectItem>
+                        <SelectItem value="string">String</SelectItem>
+                        <SelectItem value="integer">Integer</SelectItem>
+                        <SelectItem value="pure">Pure</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Text Input for Argument Value */}
+                  <Input
+                    value={arg.value}
+                    onChange={(e) => handleArgumentChange(e.target.value, index, "value")}
+                    placeholder="Enter value..."
+                  />
+                </div>
+              </div>
+
+              {/* Remove Argument Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removeArgument(index)}
+              >
+                <Trash className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+
+          {/* Outputs */}
+          <div className="flex items-center gap-2 mt-4">
+            <Label>Outputs (read only):</Label>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={addOutput}
+              className=""
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+
+          {outputsList.map((output, index) => (
+            <div key={index} className="flex items-start gap-2 mb-2 relative">
+              <Handle
+                type="source"
+                position={Position.Right}  // Right handle for outputs
+                id={`right-output-${index}`}
+                isConnectable={true}
+                style={{
+                  right: "-24px", // Adjust spacing as needed
+                  position: "absolute",
+                  width: "10px",
+                  height: "5px",
+                  borderRadius: "0",
+                  border: "none"
+                }}
+              />
+              <div className="flex flex-col w-full">
+                <div className="flex gap-2">
+                  {/* Readonly Text Input for Output */}
+                  <Input
+                    value={output.value}
+                    onChange={(e) => handleOutputChange(e.target.value, index)}
+                    placeholder={`Output value ${index}`}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              {/* Remove Output Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => removeOutput(index)}
+              >
+                <Trash className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </TooltipProvider>
       </CardContent>
       <Handle
         type="target"

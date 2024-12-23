@@ -114,7 +114,7 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
         <div className="flex h-5 items-center space-x-4 text-sm justify-between w-full">
           <SidebarGroupLabel>Data provided by the&nbsp;<a href="https://blockberry.one" target="_blank"><b>Blockberry API</b></a></SidebarGroupLabel>
           <Separator orientation="vertical" />
-          <SidebarGroupLabel><a href="https://github.com/dev-matthew/sui-tx-builder" target="_blank" className="flex items-center"><Github className="mr-2"></Github><b>Source Code</b></a></SidebarGroupLabel>
+          <SidebarGroupLabel><a href="https://github.com/dev-matthew/sui-tx-builder" target="_blank" className="flex items-center"><Github className="mr-2 h-5 w-5"></Github><b>Source Code</b></a></SidebarGroupLabel>
         </div>
       </SidebarFooter>
     </Sidebar>
