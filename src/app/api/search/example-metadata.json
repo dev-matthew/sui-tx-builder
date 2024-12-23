@@ -1,0 +1,86 @@
+{
+    "0x1798f84ee72176114ddbf5525a6d964c5f8ea1b3738d08d50d0d3de4cf584884": {
+      "objectType": "PACKAGE",
+      "id": "0x1798f84ee72176114ddbf5525a6d964c5f8ea1b3738d08d50d0d3de4cf584884",
+      "name": "Sparkling Finance",
+      "imgUrl": null,
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": "Sparkling Finance",
+      "projectImg": "https://strapi-dev.scand.app/uploads/Sparkling_Finance_Logo_b2d587a5c5.jpg",
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0xb50b269fae6b2080234dbb3ebc4e4b07a5d31e058ef92e8f8d306713bf44d1d3": {
+      "objectType": "ACCOUNT",
+      "id": "0xb50b269fae6b2080234dbb3ebc4e4b07a5d31e058ef92e8f8d306713bf44d1d3",
+      "name": "@fogel",
+      "imgUrl": "https://storage.googleapis.com/suins-nft-images/QmaLFg4tQYansFpyRqmDfABdkUVy66dHtpnkH15v1LPzcY.png",
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": null,
+      "projectImg": null,
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0x75b23bde4de9aca930d8c1f1780aa65ee777d8b33c3045b053a178b452222e82": {
+      "objectType": "PACKAGE",
+      "id": "0x75b23bde4de9aca930d8c1f1780aa65ee777d8b33c3045b053a178b452222e82",
+      "name": "Fountain Finance",
+      "imgUrl": null,
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": "Fountain Finance",
+      "projectImg": "https://strapi-dev.scand.app/uploads/Fountain_Finance_Logo_2eefe67198.jpg",
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0x0000000000000000000000000000000000000000000000000000000000000002": {
+      "objectType": "PACKAGE",
+      "id": "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "name": "Sui Framework",
+      "imgUrl": null,
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": "Sui",
+      "projectImg": "https://strapi-dev.scand.app/uploads/sui_asset_14cdaa7da0.webp",
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0x2::sui::SUI": {
+      "objectType": "COIN",
+      "id": "0x2::sui::SUI",
+      "name": "Sui",
+      "imgUrl": "https://strapi-dev.scand.app/uploads/sui_c07df05f00.png",
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": null,
+      "projectImg": null,
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0xce7ff77a83ea0cb6fd39bd8748e2ec89a3f41e8efdc3f4eb123e0ca37b184db2::buck::BUCK": {
+      "objectType": "COIN",
+      "id": "0xce7ff77a83ea0cb6fd39bd8748e2ec89a3f41e8efdc3f4eb123e0ca37b184db2::buck::BUCK",
+      "name": "Bucket USD",
+      "imgUrl": "https://ipfs.io/ipfs/QmYH4seo7K9CiFqHGDmhbZmzewHEapAhN9aqLRA7af2vMW",
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": null,
+      "projectImg": null,
+      "isIndexed": null,
+      "securityMessage": null
+    },
+    "0x0000000000000000000000000000000000000000000000000000000000000006": {
+      "objectType": "OBJECT",
+      "id": "0x0000000000000000000000000000000000000000000000000000000000000006",
+      "name": "Sui System Clock",
+      "imgUrl": null,
+      "symbol": null,
+      "poolCoins": null,
+      "projectName": null,
+      "projectImg": null,
+      "isIndexed": null,
+      "securityMessage": null
+    }
+}

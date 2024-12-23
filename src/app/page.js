@@ -202,7 +202,8 @@ export default function Main() {
         }
       }
     })
-    console.log(outputCountsPerNode);
+
+    console.log(data);
 
     let x = 50;
     let y = 50;
@@ -226,7 +227,8 @@ export default function Main() {
               function: func[id]["function"],
               arguments: func[id]["arguments"].map(item => ({"value": getInput(inputs, item)})),
               outputs: new Array(outputCountsPerNode[index]).fill({value: ""}),
-              backwardEdges: getBackwardEdges(func[id]["arguments"])
+              backwardEdges: getBackwardEdges(func[id]["arguments"]),
+              packageData: data.addedMetadata?.[func[id]["package"]]
             }
             break;
           case "SplitCoins":

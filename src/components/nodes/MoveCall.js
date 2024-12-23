@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useRef } from "react";
 import { Handle, Position } from '@xyflow/react';
 import {
   Card,
@@ -34,15 +34,19 @@ import {
 
 const MoveCallNode = ({ data, selected }) => {
   const [packageValue, setPackageValue] = useState(data.package || "");
+  const previousPackageValue = useRef(packageValue);
   const [moduleValue, setModuleValue] = useState(data.module || "");
   const [functionValue, setFunctionValue] = useState(data.function || "");
   const [argumentsList, setArgumentsList] = useState(data.arguments || []);
   const [outputsList, setOutputsList] = useState(data.outputs || []);
   const [loading, setLoading] = useState(false);
-  const [packageData, setPackageData] = useState({});
+  const [packageData, setPackageData] = useState(data.packageData || {});
 
   const handlePackageBlur = async () => {
-    return; // Disable security check for now because too many requests
+    if (packageValue === previousPackageValue.current) {
+      // Do nothing if the value hasn't changed
+      return;
+    }
 
     // TODO: Check if packageValue looks like a good value before making the request?
     if (packageValue == "") {
@@ -63,26 +67,15 @@ const MoveCallNode = ({ data, selected }) => {
       }
   
       const data = await response.json();
-      console.log(data);
-      setPackageData({
-        name: data.projectName,
-        icon: data.projectImg,
-        security: data.securityMessage,
-        verified: data.isVerified
-      })
+      console.log("Individual package lookup:", data);
+      setPackageData(data);
     } catch (error) {
       setPackageData({})
     } finally {
       setLoading(false);
+      previousPackageValue.current = packageValue;
     }
   };
-
-  useEffect(() => {
-    // Trigger the API request if a package name is initially provided
-    if (packageValue) {
-      handlePackageBlur();
-    }
-  }, [packageValue]);
 
   const addArgument = () => {
     setArgumentsList((prev) => [...prev, { type: undefined, value: "" }]);
@@ -167,18 +160,18 @@ const MoveCallNode = ({ data, selected }) => {
                 {loading || packageValue == "" ? (
                     <LoaderCircle className="animate-spin w-5 h-5" hidden={packageValue == ""} />
                   ) : (
-                  packageData.security != null || packageData.name == null ? (
+                  Object.keys(packageData).length == 0 || packageData.securityMessage != null || packageData.projectName == null ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <TriangleAlert
                           className="h-5 w-5"
                           style={{
-                            color: packageData.security != null ? "red" : "orange",
+                            color: packageData.securityMessage != null ? "red" : "orange",
                           }}
                         />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{packageData.seucrity != null ? packageData.security : "Error looking up package (network error or unknown package name)"}</p>
+                        <p>{packageData.securityMessage != null ? packageData.securityMessage : "Error looking up package (network error or unknown package name)"}</p>
                         <p>Please beware of scams!</p>
                       </TooltipContent>
                     </Tooltip>
@@ -186,12 +179,12 @@ const MoveCallNode = ({ data, selected }) => {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Avatar className="h-6 w-6 text-xs">
-                          <AvatarImage src={packageData.icon} alt="@shadcn" />
+                          <AvatarImage src={packageData.projectImg} alt="@shadcn" />
                           <AvatarFallback>0x</AvatarFallback>
                         </Avatar>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {`Known package: ${packageData.name}`}
+                        {`Known package: ${packageData.projectName}`}
                       </TooltipContent>
                     </Tooltip>
                 ))}
