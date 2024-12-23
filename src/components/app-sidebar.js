@@ -16,15 +16,14 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Blocks } from "@/components/blocks";
 import { Templates } from "@/components/templates";
+import { Variables } from "@/components/variables";
  
-export function AppSidebar({ onAddNode, onSearch }) {
+export function AppSidebar({ onAddNode, onSearch, toast }) {
   const [loading, setLoading] = useState(false);
   const [transactionDigest, setTransactionDigest] = useState("");
-  const { toast } = useToast()
 
   const handleInputChange = (event) => {
     setTransactionDigest(event.target.value);
@@ -108,6 +107,7 @@ export function AppSidebar({ onAddNode, onSearch }) {
           </SidebarGroupContent>
         </SidebarGroup>
         <Blocks onAddNode={onAddNode}/>
+        <Variables />
         <Templates />
       </SidebarContent>
       <SidebarFooter>

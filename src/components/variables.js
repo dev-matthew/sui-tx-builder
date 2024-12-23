@@ -9,55 +9,40 @@ import {
     SidebarMenuButton
   } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { ChevronDown, Send, Parentheses, Split, StickyNote, Merge } from "lucide-react";
-import TransferObjects from "@/components/nodes/TransferObjects";
-import MoveCall from "@/components/nodes/MoveCall";
-import SplitCoins from "@/components/nodes/SplitCoins";
-import MergeCoins from "@/components/nodes/MergeCoins";
 
-export const blocks = [
+import { ChevronDown, Clock, UserRound, SquarePen } from "lucide-react";
+
+const variables = [
     {
-        id: "TransferObjects",
-        title: "Transfer Objects",
-        icon: Send,
-        node: TransferObjects
+        title: "My Address",
+        icon: UserRound
     },
     {
-        id: "MoveCall",
-        title: "Move Call",
-        icon: Parentheses,
-        node: MoveCall
+        title: "Sui System Clock",
+        icon: Clock
     },
     {
-        id: "SplitCoins",
-        title: "Split Coins",
-        icon: Split,
-        node: SplitCoins
-    },
-    {
-        id: "MergeCoins",
-        title: "Merge Coins",
-        icon: Merge,
-        node: MergeCoins
+        title: "Custom",
+        icon: SquarePen
     }
 ]
 
-export function Blocks({ onAddNode }) {
+export function Variables() {
     return (
         <Collapsible defaultOpen className="group/collapsible">
             <SidebarGroup>
                 <SidebarGroupLabel asChild>
                 <CollapsibleTrigger>
-                    Basic Building Blocks
+                    Variables
                     <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
                 </SidebarGroupLabel>
                 <CollapsibleContent>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {blocks.map((item, index) => (
-                                <SidebarMenuItem key={item.id}>
-                                    <SidebarMenuButton asChild className="hover:cursor-pointer" onClick={() => onAddNode(item)}>
+                            {variables.map((item, index) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild className="hover:cursor-pointer">
                                         <span><item.icon className="text-sui" />{item.title}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
