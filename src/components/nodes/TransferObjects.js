@@ -87,7 +87,7 @@ const TransferObjectsNode = ({ data, selected }) => {
             <Handle
               type="target"
               position={Position.Left}
-              id={`left-input-${index}`}
+              id={`left-${index}`}
               isConnectable={true}
               style={{
                 left: "-24px", // Adjust spacing as needed

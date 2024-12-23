@@ -166,7 +166,8 @@ const MoveCallNode = ({ data, selected }) => {
                         />
                       </TooltipTrigger>
                       <TooltipContent>
-                        {packageData.seucrity != null ? packageData.security : "Error looking up package (network error or unknown package name), please beware of scams!"}
+                        <p>{packageData.seucrity != null ? packageData.security : "Error looking up package (network error or unknown package name)"}</p>
+                        <p>Please beware of scams!</p>
                       </TooltipContent>
                     </Tooltip>
                   ) : (
@@ -266,7 +267,7 @@ const MoveCallNode = ({ data, selected }) => {
               <Handle
                 type="target"
                 position={Position.Left}
-                id={`left-argument-${index}`}
+                id={`left-${index}`}
                 isConnectable={true}
                 style={{
                   left: "-24px", // Adjust spacing as needed
@@ -293,6 +294,7 @@ const MoveCallNode = ({ data, selected }) => {
                         <SelectItem value="string">String</SelectItem>
                         <SelectItem value="integer">Integer</SelectItem>
                         <SelectItem value="pure">Pure</SelectItem>
+                        <SelectItem value="object">Object</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -335,7 +337,7 @@ const MoveCallNode = ({ data, selected }) => {
               <Handle
                 type="source"
                 position={Position.Right}  // Right handle for outputs
-                id={`right-output-${index}`}
+                id={`right-${index}`}
                 isConnectable={true}
                 style={{
                   right: "-24px", // Adjust spacing as needed

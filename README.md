@@ -5,8 +5,6 @@ npm run dev
 ```
 
 TODO List:
-- Split coins
-- Merge coins
 - When we look up a transaction block, it then looks up each package's metadata in an API request, which causes us to get rate limited. Find a way to fix this.
 - Understand how to interpret move calls like this:
   - ```{

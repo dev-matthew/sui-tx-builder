@@ -56,6 +56,19 @@ export default function Main() {
         });
       }
 
+      if (customData.backwardEdges) {
+        customData.backwardEdges.forEach(function(edge, index) {
+          // edge is an array with 2 values (index of node, index of output)
+          const prevNodeId = prevNodes[edge[0]].id;
+          onConnect({
+            source: prevNodeId,
+            target: newNodeId,
+            sourceHandle: edge[1],
+            targetHandle: edge[2]
+          })
+        })
+      }
+
       return [...prevNodes, newNode];
     });
   };  
@@ -76,7 +89,7 @@ export default function Main() {
       if (!((params.sourceHandle.includes("right") && params.targetHandle.includes("left")) || (params.sourceHandle.includes("left") && params.targetHandle.includes("right")))) {
         toast({
           title: `Couldn't add edge`,
-          description: `Data handles can only be connected horizontally`
+          description: `Data handles can only be connected horizontally, and sequence handles can only be connected vertically`
         })
         return;
       }
@@ -106,15 +119,91 @@ export default function Main() {
           },
           selectable: true,
           focusable: true,
-          animated: horizontal
+          animated: horizontal,
+          type: horizontal ? "default" : "smoothstep"
         },
       ];
     });
   };
-  
+
+  const getInput = (inputs, input) => {
+    if ("Input" in input) {
+      let index = input["Input"]
+      let input_obj = inputs[index];
+      let returnValue = "Unknown";
+      if (input_obj.type == "object") {
+        returnValue = input_obj.objectId;
+      } else if (input_obj.type == "pure") {
+        returnValue = input_obj.value;
+      }
+      return returnValue;
+    } else {
+      // then this value comes from nested result or result so we will leave it blank for now
+      return undefined;
+    }
+  }
+
+  const extractArgsCounts = (args, countArr) => {
+    args.forEach(function(arg, index) {
+      if ("NestedResult" in arg) {
+        countArr[arg["NestedResult"][0]] = Math.max(countArr[arg["NestedResult"][0]], arg["NestedResult"][1] + 1)
+      } else if ("Result" in arg) {
+        countArr[arg["Result"]] = Math.max(countArr[arg["Result"]], 1)
+      }
+    })
+  }
+
+  const getBackwardEdges = (args, singleArg = undefined, argTagSuffix = "") => {
+    let backwardEdgesList = [];
+    args.forEach(function(arg, index_arg) {
+      if ("NestedResult" in arg) {
+        backwardEdgesList.push([arg["NestedResult"][0], `right-${arg["NestedResult"][1]}`, `left-${index_arg}`])
+      } else if ("Result" in arg) {
+        // prev node id, source handle, target handle
+        backwardEdgesList.push([arg["Result"], `right-0`, `left-${index_arg}`])
+      }
+    });
+    if (singleArg != undefined) {
+      if ("NestedResult" in singleArg) {
+        backwardEdgesList.push([singleArg["NestedResult"][0], `right-${singleArg["NestedResult"][1]}`, `left-${argTagSuffix}`])
+      } else if ("Result" in singleArg) {
+        backwardEdgesList.push([singleArg["Result"], `right-0`, `left-${argTagSuffix}`])
+      }
+    }
+    return backwardEdgesList;
+  }
 
   const search = (data) => {
+    /*  The first thing we do is go through every transaction and see what args it is using.
+        If it is using outputs from previous transactions as args for this one, we update the
+        output count for the previous transaction so that we can create an edge later on.
+    */
     let functions = data.result.transaction.data.transaction.transactions;
+    let inputs = data.result.transaction.data.transaction.inputs;
+    let outputCountsPerNode = new Array(functions.length).fill(0);
+    functions.forEach(function(func, index) {
+      let id = Object.keys(func)[0];
+      let block = blocks.find(block => block.id === id);
+      if (block) {
+        switch(id) {
+          case "MoveCall":
+            extractArgsCounts(func[id]["arguments"], outputCountsPerNode);
+            break;
+          case "TransferObjects":
+            extractArgsCounts(func[id][0], outputCountsPerNode);
+            break;
+          case "MergeCoins":
+            break;
+          case "SplitCoins":
+            extractArgsCounts(func[id][1], outputCountsPerNode);
+            break;
+          default:
+            break;
+        }
+      }
+    })
+    console.log(outputCountsPerNode);
+
     let x = 50;
     let y = 50;
     functions.forEach(function(func, index) {
@@ -125,8 +214,9 @@ export default function Main() {
         switch (id) {
           case "TransferObjects":
             customData = {
-              to: func[id][1]["Input"],
-              objects: func[id][0].map(item => item.Result)
+              to: getInput(inputs, func[id][1]),
+              objects: func[id][0].map(item => getInput(inputs, item)),
+              backwardEdges: getBackwardEdges(func[id][0], func[id][1], "to")
             }
             break;
           case "MoveCall":
@@ -134,11 +224,27 @@ export default function Main() {
               package: func[id]["package"],
               module: func[id]["module"],
               function: func[id]["function"],
-              arguments: func[id]["arguments"].map(item => ({
-                "type": undefined,
-                "value": item["Input"]
-              }))
+              arguments: func[id]["arguments"].map(item => ({"value": getInput(inputs, item)})),
+              outputs: new Array(outputCountsPerNode[index]).fill({value: ""}),
+              backwardEdges: getBackwardEdges(func[id]["arguments"])
             }
+            break;
+          case "SplitCoins":
+            let isGas = typeof func[id][0] == "string";
+            let backwardEdgesList;
+            if (isGas) {
+              backwardEdgesList = getBackwardEdges(func[id][1]);
+            } else {
+              backwardEdgesList = getBackwardEdges(func[id][1], func[id][0], "coin");
+            }
+            customData = {
+              coin: isGas ? func[id][0] : getInput(inputs, func[id][0]),
+              amounts: func[id][1].map(item => item.Input),
+              backwardEdges: backwardEdgesList
+            }
+            break;
+          case "MergeCoins":
+            customData = {}
             break;
         }
         addNode(block, x, y, index > 0, customData);
