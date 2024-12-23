@@ -10,7 +10,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const TransferObjectsNode = ({ data, selected }) => {
   const [inputs, setInputs] = useState(data.objects || [""]);
@@ -40,10 +46,22 @@ const TransferObjectsNode = ({ data, selected }) => {
       }}
     >
       <CardHeader className="bg-sui rounded-t-[inherit] text-white mb-4 p-4">
-        <CardTitle className="flex items-center gap-2">
-          <data.icon className="w-4 h-4" />
-          <span className="ml-1">{data.label}</span>
-        </CardTitle>
+        <TooltipProvider>
+          <CardTitle className="flex items-center gap-2">
+            <data.icon className="w-4 h-4" />
+            <span className="ml-1">{data.label}</span>
+            <div className="ml-auto">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Transfers a list of objects to the specified address.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </CardTitle>
+        </TooltipProvider>
       </CardHeader>
       <CardContent>
         {/* "To" Field */}

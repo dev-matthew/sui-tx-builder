@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash, ShieldCheck, TriangleAlert, LoaderCircle } from "lucide-react";
+import { Plus, Trash, ShieldCheck, TriangleAlert, LoaderCircle, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -124,10 +124,22 @@ const MoveCallNode = ({ data, selected }) => {
       }}
     >
       <CardHeader className="bg-sui rounded-t-[inherit] text-white mb-4 p-4">
-        <CardTitle className="flex items-center gap-2">
-          <data.icon className="w-4 h-4" />
-          <span className="ml-1">{data.label}</span>
-        </CardTitle>
+        <TooltipProvider>
+          <CardTitle className="flex items-center gap-2">
+            <data.icon className="w-4 h-4" />
+            <span className="ml-1">{data.label}</span>
+            <div className="ml-auto">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Executes a Move call. Returns whatever the Sui Move call returns.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </CardTitle>
+        </TooltipProvider>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
