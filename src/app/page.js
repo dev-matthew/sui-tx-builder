@@ -239,7 +239,7 @@ export default function Main() {
             }
             customData = {
               coin: isGas ? func[id][0] : getInput(inputs, func[id][0]),
-              amounts: func[id][1].map(item => item.Input),
+              amounts: func[id][1].map(item => getInput(inputs, item)),
               backwardEdges: backwardEdgesList
             }
             break;

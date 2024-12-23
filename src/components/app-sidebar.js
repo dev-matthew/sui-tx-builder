@@ -54,6 +54,7 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
         throw new Error(`Error: ${response.status}`);
       }
       onSearch(data);
+      // maybe here we can also display stuff under the search bar about the transaction like state change, etc
     } catch (error) {
       toast({
         title: `Couldn't find ${transactionDigest}`,
@@ -107,7 +108,7 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
           </SidebarGroupContent>
         </SidebarGroup>
         <Blocks onAddNode={onAddNode}/>
-        <Variables />
+        {/* <Variables /> */}
         <Templates />
       </SidebarContent>
       <SidebarFooter>

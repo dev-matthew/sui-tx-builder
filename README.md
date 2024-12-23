@@ -6,41 +6,12 @@ npm run dev
 
 TODO List:
 - When we look up a transaction block, it then looks up each package's metadata in an API request, which causes us to get rate limited. Find a way to fix this.
-- Understand how to interpret move calls like this:
-  - ```{
-    "MoveCall": {
-        "package": "0x04e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91",
-        "module": "pyth",
-        "function": "update_single_price_feed",
-        "arguments": [
-        {
-            "Input": 3
-        },
-        {
-            "NestedResult": [
-            1,
-            0
-            ]
-        },
-        {
-            "Input": 8
-        },
-        {
-            "NestedResult": [
-            2,
-            0
-            ]
-        },
-        {
-            "Input": 2
-        }
-        ]
-    }
-  - Also understand "type arguments"
-  - Update move call argument types to handle every case (different from type arguments)
-  - Display outputs correctly (can do this after we finish the executing transactions functionality?)
+- Also understand "type arguments"
+- Update move call argument types to handle every case (different from type arguments)
+- Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
 - See if we need to do anything with makeMoveVec
-- Variable nodes
+  - also if we need to do anything with publish, update transactions (these are used for creating move packages)
+- Variable nodes?
 - Propagating variables to other nodes
 - Template nodes
 - Executing transactions (connecting wallet, etc)
