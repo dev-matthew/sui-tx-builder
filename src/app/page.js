@@ -11,6 +11,9 @@ import { useToast } from "@/components/hooks/use-toast";
 import { ReactFlow, Background, Controls, Panel, ViewportPortal, useNodesState, useEdgesState, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import {Ellipsis} from "lucide-react"
+import EmptyNode from "@/components/nodes/EmptyNode";
+
 export default function Main() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -19,7 +22,9 @@ export default function Main() {
   const nodeTypes = blocks.reduce((acc, block) => {
     acc[block.id] = block.node;
     return acc;
-  }, {});
+  }, {
+    "empty": EmptyNode
+  });
 
   const addNode = (
     block,
@@ -259,8 +264,15 @@ export default function Main() {
             break;
         }
         addNode(block, x, y, index > 0, customData);
-        x += 350;
+      } else {
+        addNode({
+          id: "empty",
+          title: id,
+          icon: Ellipsis,
+          node: EmptyNode
+        }, x, y, index > 0);
       }
+      x += 350;
     });
   }
 

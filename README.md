@@ -5,11 +5,10 @@ npm run dev
 ```
 
 TODO List:
-- Also understand/handle "type arguments"
+- Understand/handle "type arguments"
 - Update move call argument types to handle every case (different from type arguments)
 - Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
-- See if we need to do anything with makeMoveVec
-  - also if we need to do anything with publish, update transactions (these are used for creating move packages)
+- Find examples for publish, update transactions (these are used for creating move packages), we won't support editing these but need to handle it if it's in the transaction block
 - Variable nodes?
 - Propagating variables to other nodes
 - Template nodes
