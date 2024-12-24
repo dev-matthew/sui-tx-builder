@@ -5,8 +5,7 @@ npm run dev
 ```
 
 TODO List:
-- When we look up a transaction block, it then looks up each package's metadata in an API request, which causes us to get rate limited. Find a way to fix this.
-- Also understand "type arguments"
+- Also understand/handle "type arguments"
 - Update move call argument types to handle every case (different from type arguments)
 - Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
 - See if we need to do anything with makeMoveVec

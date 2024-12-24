@@ -13,6 +13,7 @@ export async function POST(req) {
     "x-api-key": apiKey,
   };
 
+  // https://docs.blockberry.one/reference/getrawtransactionbyhash
   const response = await fetch(`https://api.blockberry.one/sui/v1/raw-transactions/${transactionDigest}`, {
     method: "GET",
     headers,
@@ -24,8 +25,9 @@ export async function POST(req) {
 
   const data = await response.json();
 
-  await delay(2000);
+  await delay(parseInt(process.env.BLOCKBERRY_DELAY, 10) || 2000);
 
+  // https://docs.blockberry.one/reference/gettransactionmetadata
   const response2 = await fetch(`https://api.blockberry.one/sui/v1/transactions/${transactionDigest}/metadata`, {
     method: "GET",
     headers,
