@@ -361,6 +361,7 @@ const MoveCallNode = ({ data, selected }) => {
                     onChange={(e) => handleOutputChange(e.target.value, index)}
                     placeholder={`Output value ${index}`}
                     readOnly
+                    className="cursor-not-allowed"
                   />
                 </div>
               </div>

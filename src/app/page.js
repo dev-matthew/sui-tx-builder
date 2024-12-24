@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -190,11 +190,14 @@ export default function Main() {
             extractArgsCounts(func[id]["arguments"], outputCountsPerNode);
             break;
           case "TransferObjects":
-            extractArgsCounts(func[id][0], outputCountsPerNode);
+            extractArgsCounts([...func[id][0], func[id][1]], outputCountsPerNode);
             break;
           case "MergeCoins":
             break;
           case "SplitCoins":
+            extractArgsCounts([...func[id][1], func[id][0]], outputCountsPerNode);
+            break;
+          case "MakeMoveVec":
             extractArgsCounts(func[id][1], outputCountsPerNode);
             break;
           default:
@@ -247,6 +250,12 @@ export default function Main() {
             break;
           case "MergeCoins":
             customData = {}
+            break;
+          case "MakeMoveVec":
+            customData = {
+              arguments: func[id][1].map(item => ({"value": getInput(inputs, item)})),
+              backwardEdges: getBackwardEdges(func[id][1])
+            }
             break;
         }
         addNode(block, x, y, index > 0, customData);

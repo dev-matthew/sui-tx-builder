@@ -9,11 +9,12 @@ import {
     SidebarMenuButton
   } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { ChevronDown, Send, Parentheses, Split, StickyNote, Merge } from "lucide-react";
+import { ChevronDown, Send, Parentheses, Split, StickyNote, Merge, ListFilter } from "lucide-react";
 import TransferObjects from "@/components/nodes/TransferObjects";
 import MoveCall from "@/components/nodes/MoveCall";
 import SplitCoins from "@/components/nodes/SplitCoins";
 import MergeCoins from "@/components/nodes/MergeCoins";
+import MakeMoveVec from "@/components/nodes/MakeMoveVec";
 
 export const blocks = [
     {
@@ -39,6 +40,12 @@ export const blocks = [
         title: "Merge Coins",
         icon: Merge,
         node: MergeCoins
+    },
+    {
+        id: "MakeMoveVec",
+        title: "Make Move Vector",
+        icon: ListFilter,
+        node: MakeMoveVec
     }
 ]
 
