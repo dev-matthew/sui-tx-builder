@@ -208,6 +208,7 @@ export default function Main() {
             extractArgsCounts([...func[id][0], func[id][1]], outputCountsPerNode);
             break;
           case "MergeCoins":
+            extractArgsCounts([...func[id][1], func[id][0]], outputCountsPerNode);
             break;
           case "SplitCoins":
             extractArgsCounts([...func[id][1], func[id][0]], outputCountsPerNode);
@@ -264,7 +265,10 @@ export default function Main() {
             }
             break;
           case "MergeCoins":
-            customData = {}
+            customData = {
+              destinationCoin: getTypeAndInput(inputs, func[id][0])[1],
+              sourceCoins: func[id][1].map(item => getTypeAndInput(inputs, item)[1])
+            }
             break;
           case "MakeMoveVec":
             customData = {
