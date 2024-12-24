@@ -131,29 +131,37 @@ export default function Main() {
     });
   };
 
-  const getInput = (inputs, input) => {
+  const getTypeAndInput = (inputs, input) => {
     if ("Input" in input) {
       let index = input["Input"]
       let input_obj = inputs[index];
-      let returnValue = "Unknown";
+      let returnValue = [undefined, "Unknown"];
       if (input_obj.type == "object") {
-        returnValue = input_obj.objectId;
+        returnValue = ["object", input_obj.objectId];
       } else if (input_obj.type == "pure") {
-        returnValue = input_obj.value;
+        let valueType = input_obj.valueType;
+        if (valueType.includes("vector")) {
+          valueType = "vector";
+        } else if (valueType.includes("option")) {
+          valueType = "option";
+        }
+        returnValue = [valueType, input_obj.value];
       }
       return returnValue;
     } else {
       // then this value comes from nested result or result so we will leave it blank for now
-      return undefined;
+      return ["result", undefined];
     }
   }
 
   const extractArgsCounts = (args, countArr) => {
     args.forEach(function(arg, index) {
-      if ("NestedResult" in arg) {
-        countArr[arg["NestedResult"][0]] = Math.max(countArr[arg["NestedResult"][0]], arg["NestedResult"][1] + 1)
-      } else if ("Result" in arg) {
-        countArr[arg["Result"]] = Math.max(countArr[arg["Result"]], 1)
+      if (arg != undefined && typeof arg != "string") {
+        if ("NestedResult" in arg) {
+          countArr[arg["NestedResult"][0]] = Math.max(countArr[arg["NestedResult"][0]], arg["NestedResult"][1] + 1)
+        } else if ("Result" in arg) {
+          countArr[arg["Result"]] = Math.max(countArr[arg["Result"]], 1)
+        }
       }
     })
   }
@@ -161,14 +169,16 @@ export default function Main() {
   const getBackwardEdges = (args, singleArg = undefined, argTagSuffix = "") => {
     let backwardEdgesList = [];
     args.forEach(function(arg, index_arg) {
-      if ("NestedResult" in arg) {
-        backwardEdgesList.push([arg["NestedResult"][0], `right-${arg["NestedResult"][1]}`, `left-${index_arg}`])
-      } else if ("Result" in arg) {
-        // prev node id, source handle, target handle
-        backwardEdgesList.push([arg["Result"], `right-0`, `left-${index_arg}`])
+      if (arg != undefined && typeof arg != "string") {
+        if ("NestedResult" in arg) {
+          backwardEdgesList.push([arg["NestedResult"][0], `right-${arg["NestedResult"][1]}`, `left-${index_arg}`])
+        } else if ("Result" in arg) {
+          // prev node id, source handle, target handle
+          backwardEdgesList.push([arg["Result"], `right-0`, `left-${index_arg}`])
+        }
       }
     });
-    if (singleArg != undefined) {
+    if (singleArg != undefined && typeof singleArg != "string") {
       if ("NestedResult" in singleArg) {
         backwardEdgesList.push([singleArg["NestedResult"][0], `right-${singleArg["NestedResult"][1]}`, `left-${argTagSuffix}`])
       } else if ("Result" in singleArg) {
@@ -223,8 +233,8 @@ export default function Main() {
         switch (id) {
           case "TransferObjects":
             customData = {
-              to: getInput(inputs, func[id][1]),
-              objects: func[id][0].map(item => getInput(inputs, item)),
+              to: getTypeAndInput(inputs, func[id][1])[1],
+              objects: func[id][0].map(item => getTypeAndInput(inputs, item))[1],
               backwardEdges: getBackwardEdges(func[id][0], func[id][1], "to")
             }
             break;
@@ -233,7 +243,7 @@ export default function Main() {
               package: func[id]["package"],
               module: func[id]["module"],
               function: func[id]["function"],
-              arguments: func[id]["arguments"].map(item => ({"value": getInput(inputs, item)})),
+              arguments: func[id]["arguments"].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
               outputs: new Array(outputCountsPerNode[index]).fill({value: ""}),
               backwardEdges: getBackwardEdges(func[id]["arguments"]),
               packageData: data.addedMetadata?.[func[id]["package"]]
@@ -248,8 +258,8 @@ export default function Main() {
               backwardEdgesList = getBackwardEdges(func[id][1], func[id][0], "coin");
             }
             customData = {
-              coin: isGas ? func[id][0] : getInput(inputs, func[id][0]),
-              amounts: func[id][1].map(item => getInput(inputs, item)),
+              coin: isGas ? func[id][0] : getTypeAndInput(inputs, func[id][0])[1],
+              amounts: func[id][1].map(item => getTypeAndInput(inputs, item)[1]),
               backwardEdges: backwardEdgesList
             }
             break;
@@ -258,7 +268,7 @@ export default function Main() {
             break;
           case "MakeMoveVec":
             customData = {
-              arguments: func[id][1].map(item => ({"value": getInput(inputs, item)})),
+              arguments: func[id][1].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
               backwardEdges: getBackwardEdges(func[id][1])
             }
             break;

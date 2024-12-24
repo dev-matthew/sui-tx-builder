@@ -6,9 +6,10 @@ npm run dev
 
 TODO List:
 - Understand/handle "type arguments"
-- Update move call argument types to handle every case (different from type arguments)
+- Handle vectors / options?
+  - This is difficult because they can be infinitely nested, so we would need variable nodes to represent them maybe
 - Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
-- Find examples for publish, update transactions (these are used for creating move packages), we won't support editing these but need to handle it if it's in the transaction block
+- Find examples for mergecoins, publish, update transactions (these are used for creating move packages), we won't support editing these but need to handle it if it's in the transaction block
 - Variable nodes?
 - Propagating variables to other nodes
 - Template nodes

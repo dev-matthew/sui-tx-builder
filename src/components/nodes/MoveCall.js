@@ -295,11 +295,26 @@ const MoveCallNode = ({ data, selected }) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="address">Address</SelectItem>
-                        <SelectItem value="string">String</SelectItem>
-                        <SelectItem value="integer">Integer</SelectItem>
-                        <SelectItem value="pure">Pure</SelectItem>
-                        <SelectItem value="object">Object</SelectItem>
+                        <SelectLabel>Object</SelectLabel>
+                        <SelectItem value="object">object</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Result (draw an arrow)</SelectLabel>
+                        <SelectItem value="result">result</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Pure</SelectLabel>
+                        <SelectItem value="address">address</SelectItem>
+                        <SelectItem value="bool">bool</SelectItem>
+                        <SelectItem value="string">string</SelectItem>
+                        <SelectItem value="u8">u8</SelectItem>
+                        <SelectItem value="u16">u16</SelectItem>
+                        <SelectItem value="u32">u32</SelectItem>
+                        <SelectItem value="u64">u64</SelectItem>
+                        <SelectItem value="u128">u128</SelectItem>
+                        <SelectItem value="u256">u256</SelectItem>
+                        <SelectItem value="vector">vector</SelectItem>
+                        <SelectItem value="option">option</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -308,7 +323,9 @@ const MoveCallNode = ({ data, selected }) => {
                   <Input
                     value={arg.value}
                     onChange={(e) => handleArgumentChange(e.target.value, index, "value")}
-                    placeholder="Enter value..."
+                    placeholder={arg.type == "result" ? "RESULT" : "Enter value..."}
+                    readOnly={arg.type == "result"}
+                    className={arg.type == "result" ? "cursor-not-allowed" : ""}
                   />
                 </div>
               </div>
