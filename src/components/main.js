@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { ConnectButton, useWallet } from '@suiet/wallet-kit';
-import {Transaction} from "@mysten/sui/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import '@suiet/wallet-kit/style.css';
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -304,7 +304,7 @@ export default function Main() {
     if (!wallet.connected) {
       toast({
         title: `Couldn't execute transaction`,
-        description: `Please connect a wallet first`
+        description: `Please connect your wallet first`
       })
       return;
     }
@@ -312,14 +312,27 @@ export default function Main() {
     // Flatten nodes here and make sure there are no cycles, etc
 
     // Construct transaction block by parsing through everything
-    // const tx = new Transaction();
-    // const mintMany = tx.moveCall({ target: '0x1::nft::mint', arguments: [tx.pure.string("name"), tx.pure.string("description"), tx.pure.string("url")] });
-    // const resData = await wallet.signAndExecuteTransaction({
-    //   transaction: tx,
-    // });
-    // await client.waitForTransaction({ digest: resData.digest });
-    // console.log("Mintmany:", mintMany);
-    // console.log("resdata:", resData);
+    try {
+      const tx = new Transaction();
+      const mint = tx.moveCall({
+        target: '0x5b45da03d42b064f5e051741b6fed3b29eb817c7923b83b92f37a1d2abf4fbab::nft::mint',
+        arguments: [tx.pure.string("name"), tx.pure.string("description"), tx.pure.string("url")],
+      });
+      // Setting the following line gives us more descriptive errors, but isn't necessary for execution
+      // tx.setGasBudget(100000000);
+      const resData = await wallet.signAndExecuteTransaction({transaction: tx});
+      console.log("Resdata:", resData);
+      toast({
+        title: `Transaction executed`,
+        description: `https://suiscan.xyz/mainnet/tx/${resData.digest}`
+      })
+    } catch(e) {
+      toast({
+        title: `Couldn't execute transaction`,
+        description: `${e}`,
+        variant: "destructive"
+      })
+    }
   }
 
   return (
