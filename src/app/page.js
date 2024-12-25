@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {ConnectButton} from '@suiet/wallet-kit';
+import {WalletProvider} from '@suiet/wallet-kit';
+import '@suiet/wallet-kit/style.css';
+
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -291,7 +295,7 @@ export default function Main() {
   }
 
   return (
-    <>
+    <WalletProvider>
       <SidebarProvider
         style={{
           "--sidebar-width": "24rem"
@@ -303,6 +307,7 @@ export default function Main() {
           toast={toast}
         />
         <div className="w-full h-screen">
+      
           
             <ReactFlow
               nodes={nodes}
@@ -319,8 +324,11 @@ export default function Main() {
               <Controls position="bottom-left"/>
               <Panel position="top-left"><SidebarTrigger /></Panel>
               <Panel position="top-right">
-                <Button type="submit" className="mr-2 bg-sui_dark hover:bg-sui_dark hover:brightness-110">Connect Wallet</Button>
-                <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110">Execute Transaction</Button>
+              <div className="button-group">
+              <ConnectButton className="connect-button"/>
+                {/* <Button type="submit" className="mr-2 bg-sui_dark hover:bg-sui_dark hover:brightness-110">Connect Wallet</Button> */}
+                <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button">Execute Transaction</Button>
+                </div>
               </Panel>
               {nodes.length == 0 && <ViewportPortal>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center whitespace-normal p-4 max-w-sm break-words text-muted-foreground text-xl">
@@ -330,6 +338,6 @@ export default function Main() {
             </ReactFlow>
         </div>
       </SidebarProvider>
-    </>
+    </WalletProvider>
   );
 }
