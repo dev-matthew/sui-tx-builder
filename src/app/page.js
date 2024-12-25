@@ -1,22 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {ConnectButton} from '@suiet/wallet-kit';
-import {WalletProvider} from '@suiet/wallet-kit';
+import { ConnectButton, WalletProvider } from '@suiet/wallet-kit';
 import '@suiet/wallet-kit/style.css';
-
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { blocks } from "@/components/blocks";
+import EmptyNode from "@/components/nodes/EmptyNode";
 import { useToast } from "@/components/hooks/use-toast";
 
 import { ReactFlow, Background, Controls, Panel, ViewportPortal, useNodesState, useEdgesState, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-import {Ellipsis} from "lucide-react"
-import EmptyNode from "@/components/nodes/EmptyNode";
+import { Ellipsis } from "lucide-react";
 
 export default function Main() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -307,8 +303,6 @@ export default function Main() {
           toast={toast}
         />
         <div className="w-full h-screen">
-      
-          
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -324,10 +318,17 @@ export default function Main() {
               <Controls position="bottom-left"/>
               <Panel position="top-left"><SidebarTrigger /></Panel>
               <Panel position="top-right">
-              <div className="button-group">
-              <ConnectButton className="connect-button"/>
-                {/* <Button type="submit" className="mr-2 bg-sui_dark hover:bg-sui_dark hover:brightness-110">Connect Wallet</Button> */}
-                <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button">Execute Transaction</Button>
+                <div className="flex">
+                  <ConnectButton style={{
+                    fontSize: "14px",
+                    marginRight: "16px"
+                  }}> Connect Wallet </ConnectButton>
+                  <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button" style={{
+                    borderRadius: "16px",
+                    height: "48px",
+                    paddingLeft: "32px",
+                    paddingRight: "32px"
+                  }}><b>Execute Transaction</b></Button>
                 </div>
               </Panel>
               {nodes.length == 0 && <ViewportPortal>
