@@ -36,6 +36,7 @@ const TransferObjectsNode = ({ id, data, selected }) => {
       const newInputs = inputs.filter((_, i) => i !== index);
       setInputs(newInputs);
       updateNodeData(id, { objects: newInputs });
+      data.removeHandleCallback(id, `left-${index}`);
     }
   };
 

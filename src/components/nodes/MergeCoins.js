@@ -35,6 +35,7 @@ const MergeCoinsNode = ({ id, data, selected }) => {
       const newCoins = sourceCoins.filter((_, i) => i !== index);
       setSourceCoins(newCoins);
       updateNodeData(id, {sourceCoins: newCoins});
+      data.removeHandleCallback(id, `left-${index}`);
     }
   };
 

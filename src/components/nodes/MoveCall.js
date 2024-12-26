@@ -91,6 +91,7 @@ const MoveCallNode = ({ id, data, selected }) => {
       const newArguments = argumentsList.filter((_, i) => i !== index)
       setArgumentsList(newArguments);
       updateNodeData(id, {arguments: newArguments});
+      data.removeHandleCallback(id, `left-${index}`);
     }
   };
 
@@ -111,6 +112,7 @@ const MoveCallNode = ({ id, data, selected }) => {
       const newOutputs = outputsList.filter((_, i) => i !== index)
       setOutputsList(newOutputs);
       updateNodeData(id, {outputs: newOutputs});
+      data.removeHandleCallback(id, `right-${index}`);
     }
   };
 

@@ -44,6 +44,7 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
       const newArguments = argumentsList.filter((_, i) => i !== index)
       setArgumentsList(newArguments);
       updateNodeData(id, {arguments: newArguments});
+      data.removeHandleCallback(id, `left-${index}`);
     }
   };
 

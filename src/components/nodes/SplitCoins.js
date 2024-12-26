@@ -36,6 +36,8 @@ const SplitCoinsNode = ({ id, data, selected }) => {
       const newAmounts = amounts.filter((_, i) => i !== index);
       setAmounts(newAmounts);
       updateNodeData(id, { amounts: newAmounts });
+      data.removeHandleCallback(id, `left-${index}`);
+      data.removeHandleCallback(id, `right-${index}`);
     }
   };
 

@@ -48,6 +48,16 @@ export default function Main() {
     }
   }, [wallet.connected]);
 
+  const removeHandle = (id, handle) => {
+    setEdges((prev) =>
+      prev.filter(
+        (edge) =>
+          !(edge.source === id && edge.sourceHandle === handle) &&
+          !(edge.target === id && edge.targetHandle === handle)
+      )
+    );
+  };
+
   const addNode = (
     block,
     x = undefined,
@@ -69,6 +79,7 @@ export default function Main() {
           label: block.title,
           icon: block.icon,
           ...customData,
+          removeHandleCallback: removeHandle
         },
         type: block.id,
         selectable: true,
