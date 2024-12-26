@@ -12,12 +12,24 @@ import EmptyNode from "@/components/nodes/EmptyNode";
 import { useToast } from "@/components/hooks/use-toast";
 import { Ellipsis } from "lucide-react";
 
-import { ReactFlow, Background, Controls, Panel, ViewportPortal, useNodesState, useEdgesState, MarkerType } from '@xyflow/react';
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  Panel,
+  ViewportPortal,
+  useNodesState,
+  useEdgesState,
+  MarkerType,
+  useReactFlow,
+  getOutgoers
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 export default function Main() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { getNodes, getEdges } = useReactFlow();
   const { toast } = useToast();
   const wallet = useWallet();
 
@@ -86,7 +98,25 @@ export default function Main() {
 
       return [...prevNodes, newNode];
     });
-  };  
+  };
+
+  const hasCycleWrapper = (sourceIn, targetIn) => {
+    const nodes = getNodes();
+    const edges = getEdges();
+    const target = nodes.find((node) => node.id === targetIn);
+    const hasCycle = (node, visited = new Set()) => {
+      if (visited.has(node.id)) return false;
+
+      visited.add(node.id);
+
+      for (const outgoer of getOutgoers(node, nodes, edges)) {
+        if (outgoer.id === sourceIn) return true;
+        if (hasCycle(outgoer, visited)) return true;
+      }
+    };
+    if (target.id === sourceIn) return false;
+    return hasCycle(target);
+  }
 
   const onConnect = (params) => {
     if (params.source == params.target) {
@@ -109,6 +139,14 @@ export default function Main() {
         return;
       }
       horizontal = true;
+    }
+
+    if (hasCycleWrapper(params.source, params.target)) {
+      toast({
+        title: `Couldn't add edge`,
+        description: `Cycles are not allowed`
+      })
+      return;
     }
 
     const edgeId = `${params.source}/${params.sourceHandle}---${params.target}/${params.targetHandle}`;
