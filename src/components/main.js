@@ -142,12 +142,30 @@ export default function Main() {
       horizontal = true;
     }
 
+    // We don't want any cycles
     if (hasCycleWrapper(params.source, params.target)) {
       toast({
         title: `Couldn't add edge`,
         description: `Cycles are not allowed`
       })
       return;
+    }
+
+    // We don't want bottom handles going to 2 or more target handles and we don't want 2 or more bottom handles leading to the same target handle
+    if (params.sourceHandle == "bottom") {  // target handle must then be top
+      // The bottom source can't already have a target
+      const targetExists = edges.some((edge) => edge.source == params.source && edge.sourceHandle == params.sourceHandle);
+
+      // The top target can't already have a source
+      const sourceExists = edges.some((edge) => edge.target == params.target && edge.targetHandle == params.targetHandle);
+
+      if (targetExists || sourceExists) {
+        toast({
+          title: `Couldn't add edge`,
+          description: `Nodes can only have one incoming and one outgoing sequence edge`
+        })
+        return;
+      }
     }
 
     const edgeId = `${params.source}/${params.sourceHandle}---${params.target}/${params.targetHandle}`;
@@ -348,31 +366,114 @@ export default function Main() {
       return;
     }
 
-    // Flatten nodes here and make sure there are no cycles, etc
-    console.log(nodes);
-    return;
+    let dataEdges = edges.filter((edge) => edge.sourceHandle != "bottom" && edge.sourceHandle != "top");
+    let controlEdges = edges.filter((edge) => edge.sourceHandle == "bottom" || edge.sourceHandle == "top");
 
-    // Construct transaction block by parsing through everything
+    console.log("Nodes:", nodes);
+    console.log("Data edges:", dataEdges);
+    console.log("Control edges:", controlEdges);
+
+    let nodeDictionary = nodes.reduce((acc, node) => {
+      acc[node.id] = node;
+      return acc;
+    }, {});
+
+    let path = {}
+    let incomingEdges = nodes.reduce((acc, node) => {
+      acc[node.id] = 0;
+      return acc;
+    }, {});
+    let outgoingEdges = nodes.reduce((acc, node) => {
+      acc[node.id] = 0;
+      return acc;
+    }, {});
+    controlEdges.forEach((edge) => {
+      incomingEdges[edge.target] += 1;
+      outgoingEdges[edge.source] += 1;
+      path[edge.source] = edge.target;
+    });
+    let incomingEdgesCount = Object.values(incomingEdges).filter(value => value == 1).length;
+    let outgoingEdgesCount = Object.values(outgoingEdges).filter(value => value == 1).length;
+    if (incomingEdgesCount != nodes.length - 1 || outgoingEdgesCount != nodes.length - 1) {
+      toast({
+        title: `Couldn't execute transaction`,
+        description: `Please make sure every node is connected in sequence`
+      })
+      return;
+    }
+
+    let sequence = [nodeDictionary[Object.keys(incomingEdges).filter(key => incomingEdges[key] == 0)[0]]];
+    for (let i = 1; i < nodes.length; i += 1) {
+      sequence.push(nodeDictionary[path[sequence[i - 1].id]])
+    }
+    console.log("Sequence:", sequence);
+
     try {
+      let results = [];
       const tx = new Transaction();
-      const mint = tx.moveCall({
-        target: '0x5b45da03d42b064f5e051741b6fed3b29eb817c7923b83b92f37a1d2abf4fbab::nft::mint',
-        arguments: [tx.pure.string("name"), tx.pure.string("description"), tx.pure.string("url")],
+      // const mint = tx.moveCall({
+      //   target: '0x5b45da03d42b064f5e051741b6fed3b29eb817c7923b83b92f37a1d2abf4fbab::nft::mint',
+      //   arguments: [tx.pure.string("name"), tx.pure.string("description"), tx.pure.string("url")],
+      // });
+      sequence.forEach((node) => {
+        let result = null;
+        switch (node.id) {
+
+          case "TransferObjects":
+            result = tx.transferObjects({
+              objects: [],
+              address: ""
+            })
+            break;
+
+          case "MoveCall":
+            result = tx.moveCall({
+              target: "",
+              arguments: [],
+              typeArguments: []
+            })
+            break;
+
+          case "MergeCoins":
+            result = tx.mergeCoins({
+              destination: "",
+              sources: []
+            })
+            break;
+
+          case "SplitCoins":
+            result = tx.mergeCoins({
+              coin: "",
+              amounts: []
+            })
+            break;
+
+          case "MakeMoveVec":
+            result = tx.makeMoveVec({
+              type: "",
+              elements: []
+            })
+            break;
+        }
+        results.push(result);
       });
+      
       // Setting the following line gives us more descriptive errors, but isn't necessary for execution
       // tx.setGasBudget(100000000);
       const resData = await wallet.signAndExecuteTransaction({transaction: tx});
       console.log("Resdata:", resData);
       toast({
-        title: `Transaction executed`,
+        title: `Transaction executed!`,
         description: `https://suiscan.xyz/mainnet/tx/${resData.digest}`
-      })
+      });
     } catch(e) {
       toast({
         title: `Couldn't execute transaction`,
         description: `${e}`,
         variant: "destructive"
       })
+    } finally {
+      return;
     }
   }
 
