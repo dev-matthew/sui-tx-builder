@@ -53,7 +53,8 @@ export default function Main() {
     x = undefined,
     y = undefined,
     addPrevEdge = false,
-    customData = {}
+    customData = {},
+    start = 0
   ) => {
     setNodes((prevNodes) => {
       const newNodeId = `${block.id}-${prevNodes.length}`;
@@ -86,7 +87,7 @@ export default function Main() {
       if (customData.backwardEdges) {
         customData.backwardEdges.forEach(function(edge, index) {
           // edge is an array with 2 values (index of node, index of output)
-          const prevNodeId = prevNodes[edge[0]].id;
+          const prevNodeId = prevNodes[edge[0] + start].id;
           onConnect({
             source: prevNodeId,
             target: newNodeId,
@@ -255,6 +256,7 @@ export default function Main() {
   }
 
   const search = (data) => {
+    console.log("Displaying searched data:", data);
     /*  The first thing we do is go through every transaction and see what args it is using.
         If it is using outputs from previous transactions as args for this one, we update the
         output count for the previous transaction so that we can create an edge later on.
@@ -288,10 +290,10 @@ export default function Main() {
       }
     })
 
-    console.log(data);
+    let x = Math.random() * 100;
+    let y = Math.random() * 100;
+    let start = nodes.length;
 
-    let x = 50;
-    let y = 50;
     functions.forEach(function(func, index) {
       let id = Object.keys(func)[0];
       let block = blocks.find(block => block.id === id);
@@ -343,14 +345,14 @@ export default function Main() {
             }
             break;
         }
-        addNode(block, x, y, index > 0, customData);
+        addNode(block, x, y, index > 0, customData, start);
       } else {
         addNode({
           id: "empty",
           title: id,
           icon: Ellipsis,
           node: EmptyNode
-        }, x, y, index > 0);
+        }, x, y, index > 0, start);
       }
       x += 350;
     });

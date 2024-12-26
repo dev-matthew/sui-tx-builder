@@ -25,7 +25,7 @@ export async function POST(req) {
 
   const data = await response.json();
 
-  await delay(parseInt(process.env.BLOCKBERRY_DELAY, 10) || 2000);
+  await delay(process.env.BLOCKBERRY_DELAY ? parseInt(process.env.BLOCKBERRY_DELAY, 10) : 2000);
 
   // https://docs.blockberry.one/reference/gettransactionmetadata
   const response2 = await fetch(`https://api.blockberry.one/sui/v1/transactions/${transactionDigest}/metadata`, {
@@ -34,7 +34,6 @@ export async function POST(req) {
   });
 
   if (!response2.ok) {
-    console.log("ERROR HERE");
     return NextResponse.json(data);
   }
 
