@@ -151,7 +151,7 @@ const SplitCoinsNode = ({ id, data, selected }) => {
                 readOnly={incomingDataEdges.includes(`left-${index}`)}
               />
             </div>
-            {index > 0 && (
+            {amounts.length > 1 && (
               <Button variant="ghost" size="icon" onClick={() => removeAmount(index)}>
                 <Trash className="w-4 h-4" />
               </Button>

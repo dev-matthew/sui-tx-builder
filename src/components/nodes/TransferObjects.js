@@ -142,7 +142,7 @@ const TransferObjectsNode = ({ id, data, selected }) => {
                 placeholder={incomingDataEdges.includes(`left-${index}`) ? "RESULT" : "Enter an object address..."}
               />
             </div>
-            {index > 0 && (
+            {inputs.length > 1 && (
               <Button
                 variant="ghost"
                 size="icon"

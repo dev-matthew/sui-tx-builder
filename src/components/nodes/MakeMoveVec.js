@@ -157,7 +157,7 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
               </div>
 
               {/* Remove Argument Button */}
-              {index > 0 && <Button
+              {argumentsList.length > 1 && <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => removeArgument(index)}

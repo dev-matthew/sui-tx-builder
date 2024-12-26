@@ -136,7 +136,7 @@ const MergeCoinsNode = ({ id, data, selected }) => {
                 onChange={(e) => handleSourceCoinChange(e.target.value, index)}
               />
             </div>
-            {index > 0 && (
+            {sourceCoins.length > 1 && (
               <Button variant="ghost" size="icon" onClick={() => removeSourceCoin(index)}>
                 <Trash className="w-4 h-4" />
               </Button>

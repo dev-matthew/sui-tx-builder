@@ -22,8 +22,7 @@ import {
   useEdgesState,
   MarkerType,
   useReactFlow,
-  getOutgoers,
-  useNodesData
+  getOutgoers
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -115,7 +114,7 @@ export default function Main() {
         if (hasCycle(outgoer, visited)) return true;
       }
     };
-    if (target.id === sourceIn) return false;
+    if (!target || target.id === sourceIn) return false;
     return hasCycle(target);
   }
 
@@ -457,7 +456,7 @@ export default function Main() {
         }
         results.push(result);
       });
-      
+
       // Setting the following line gives us more descriptive errors, but isn't necessary for execution
       // tx.setGasBudget(100000000);
       const resData = await wallet.signAndExecuteTransaction({transaction: tx});
