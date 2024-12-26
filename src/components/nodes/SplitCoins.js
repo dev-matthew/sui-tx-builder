@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useEdges } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -22,6 +22,8 @@ const SplitCoinsNode = ({ id, data, selected }) => {
   const [coin, setCoin] = useState(data.coin || "");
   const [amounts, setAmounts] = useState(data.amounts || [""]);
   const { updateNodeData } = useReactFlow();
+  const edges = useEdges();
+  let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
 
   const addAmount = () => {
     const newAmounts = [...amounts, ""];
@@ -94,8 +96,10 @@ const SplitCoinsNode = ({ id, data, selected }) => {
           <div className="flex flex-col w-full">
             <Label className="mb-2">Coin:</Label>
             <Input
-              placeholder="Enter a coin..."
-              value={coin}
+              placeholder={incomingDataEdges.includes("left-coin") ? "RESULT" : "Enter a coin..."}
+              value={incomingDataEdges.includes("left-coin") ? "" : coin}
+              className={incomingDataEdges.includes("left-coin") ? "cursor-not-allowed" : ""}
+              readOnly={incomingDataEdges.includes("left-coin")}
               onChange={(e) => handleCoinChange(e.target.value)}
             />
           </div>
@@ -140,9 +144,11 @@ const SplitCoinsNode = ({ id, data, selected }) => {
             />
             <div className="flex flex-col w-full">
               <Input
-                value={amount}
+                value={incomingDataEdges.includes(`left-${index}`) ? "" : amount}
                 onChange={(e) => handleAmountChange(e.target.value, index)}
-                placeholder="Enter an amount..."
+                placeholder={incomingDataEdges.includes(`left-${index}`) ? "RESULT" : "Enter an amount..."}
+                className={incomingDataEdges.includes(`left-${index}`) ? "cursor-not-allowed" : ""}
+                readOnly={incomingDataEdges.includes(`left-${index}`)}
               />
             </div>
             {index > 0 && (

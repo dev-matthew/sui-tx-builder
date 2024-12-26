@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useEdges } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -22,6 +22,8 @@ const TransferObjectsNode = ({ id, data, selected }) => {
   const [inputs, setInputs] = useState(data.objects || [""]);
   const [to, setTo] = useState(data.to || "");
   const { updateNodeData } = useReactFlow();
+  const edges = useEdges();
+  let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
 
   const addInput = () => {
     const newInputs = [...inputs, ""]
@@ -93,7 +95,13 @@ const TransferObjectsNode = ({ id, data, selected }) => {
           />
           <div className="flex flex-col w-full">
             <Label className="mb-2">Destination Address:</Label>
-            <Input placeholder="Enter an address..." value={to} onChange={(e) => handleToChange(e.target.value)} />
+            <Input
+              placeholder={incomingDataEdges.includes("left-to") ? "RESULT" : "Enter an address..."}
+              className={incomingDataEdges.includes("left-to") ? "cursor-not-allowed" : ""}
+              readOnly={incomingDataEdges.includes("left-to")}
+              value={incomingDataEdges.includes("left-to") ? "" : to}
+              onChange={(e) => handleToChange(e.target.value)}
+            />
           </div>
         </div>
 
@@ -127,9 +135,11 @@ const TransferObjectsNode = ({ id, data, selected }) => {
             />
             <div className="flex flex-col w-full">
               <Input
-                value={input}
+                value={incomingDataEdges.includes(`left-${index}`) ? "" : input}
+                className={incomingDataEdges.includes(`left-${index}`) ? "cursor-not-allowed" : ""}
+                readOnly={incomingDataEdges.includes(`left-${index}`)}
                 onChange={(e) => handleInputChange(e.target.value, index)}
-                placeholder="Enter an object address..."
+                placeholder={incomingDataEdges.includes(`left-${index}`) ? "RESULT" : "Enter an object address..."}
               />
             </div>
             {index > 0 && (

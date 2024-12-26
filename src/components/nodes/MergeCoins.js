@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useEdges } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -21,6 +21,8 @@ const MergeCoinsNode = ({ id, data, selected }) => {
   const [destinationCoin, setDestinationCoin] = useState(data.destinationCoin || "");
   const [sourceCoins, setSourceCoins] = useState(data.sourceCoins || [""]);
   const { updateNodeData } = useReactFlow();
+  const edges = useEdges();
+  let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
 
   const addSourceCoin = () => {
     const newCoins = [...sourceCoins, ""];
@@ -93,8 +95,10 @@ const MergeCoinsNode = ({ id, data, selected }) => {
           <div className="flex flex-col w-full">
             <Label className="mb-2">Destination Coin:</Label>
             <Input
-              placeholder="Enter destination coin..."
-              value={destinationCoin}
+              placeholder={incomingDataEdges.includes("left-destination") ? "RESULT" : "Enter destination coin..."}
+              value={incomingDataEdges.includes("left-destination") ? "" : destinationCoin}
+              className={incomingDataEdges.includes("left-destination") ? "cursor-not-allowed" : ""}
+              readOnly={incomingDataEdges.includes("left-destination")}
               onChange={(e) => handleDestinationCoinChange(e.target.value)}
             />
           </div>
@@ -125,9 +129,11 @@ const MergeCoinsNode = ({ id, data, selected }) => {
             />
             <div className="flex flex-col w-full">
               <Input
-                value={coin}
+                placeholder={incomingDataEdges.includes(`left-${index}`) ? "RESULT" : "Enter source coin..."}
+                value={incomingDataEdges.includes(`left-${index}`) ? "" : coin}
+                className={incomingDataEdges.includes(`left-${index}`) ? "cursor-not-allowed" : ""}
+                readOnly={incomingDataEdges.includes(`left-${index}`)}
                 onChange={(e) => handleSourceCoinChange(e.target.value, index)}
-                placeholder="Enter source coin..."
               />
             </div>
             {index > 0 && (

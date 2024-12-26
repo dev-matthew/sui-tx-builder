@@ -1,5 +1,5 @@
-import { memo, useState, useRef } from "react";
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { memo, useState } from "react";
+import { Handle, Position, useReactFlow, useEdges } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash, ShieldCheck, TriangleAlert, LoaderCircle, Info } from "lucide-react";
+import { Plus, Trash, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,11 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -35,6 +30,8 @@ import {
 const MakeMoveVecNode = ({ id, data, selected }) => {
   const [argumentsList, setArgumentsList] = useState(data.arguments || [{type: undefined, value: ""}]);
   const { updateNodeData } = useReactFlow();
+  const edges = useEdges();
+  let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
 
   const addArgument = () => {
     const newArguments = [...argumentsList, {type: undefined, value: ""}]
@@ -116,7 +113,7 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
                 <div className="flex gap-2">
                   {/* Select Component for Argument Type */}
                   <Select
-                    value={arg.type}
+                    value={incomingDataEdges.includes(`left-${index}`) ? "result" : arg.type}
                     onValueChange={(value) => handleArgumentChange(value, index, "type")}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -150,11 +147,11 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
 
                   {/* Text Input for Argument Value */}
                   <Input
-                    value={arg.value}
+                    value={incomingDataEdges.includes(`left-${index}`) ? "" : arg.value}
                     onChange={(e) => handleArgumentChange(e.target.value, index, "value")}
-                    placeholder={arg.type == "result" ? "RESULT" : "Enter value..."}
-                    readOnly={arg.type == "result"}
-                    className={arg.type == "result" ? "cursor-not-allowed" : ""}
+                    placeholder={incomingDataEdges.includes(`left-${index}`) || arg.type == "result" ? "RESULT" : "Enter value..."}
+                    readOnly={incomingDataEdges.includes(`left-${index}`) || arg.type == "result"}
+                    className={incomingDataEdges.includes(`left-${index}`) || arg.type == "result" ? "cursor-not-allowed" : ""}
                   />
                 </div>
               </div>

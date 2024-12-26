@@ -9,10 +9,8 @@ TODO List:
 - Handle vectors / options?
   - This is difficult because they can be infinitely nested, so we would need variable nodes to represent them maybe
 - Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
-- Variable nodes?
-- Propagating variables to other nodes
 - Template nodes
-- Executing transactions (connecting wallet, etc)
+- Executing transactions
 - Readable transaction summary
 - Clean up code / documentation
 

@@ -1,5 +1,5 @@
 import { memo, useState, useRef } from "react";
-import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { Handle, Position, useReactFlow, useEdges } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -42,6 +42,8 @@ const MoveCallNode = ({ id, data, selected }) => {
   const [loading, setLoading] = useState(false);
   const [packageData, setPackageData] = useState(data.packageData || {});
   const { updateNodeData } = useReactFlow();
+  const edges = useEdges();
+  let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
 
   const handlePackageBlur = async () => {
     if (packageValue === previousPackageValue.current) {
@@ -162,7 +164,7 @@ const MoveCallNode = ({ id, data, selected }) => {
         <TooltipProvider>
           {/* Package Input */}
           <div className="flex items-start gap-2 mb-4 relative">
-            <Handle
+            {/* <Handle
               type="target"
               position={Position.Left}
               id="left-package"
@@ -176,7 +178,7 @@ const MoveCallNode = ({ id, data, selected }) => {
                 borderRadius: "0",
                 border: "none"
               }}
-            />
+            /> */}
             <div className="flex flex-col w-full">
               {/* Label and Icon/Avatar on the same line */}
               <div className="flex justify-between items-center mb-2">
@@ -226,7 +228,7 @@ const MoveCallNode = ({ id, data, selected }) => {
 
           {/* Module Input */}
           <div className="flex items-start gap-2 mb-4 relative">
-            <Handle
+            {/* <Handle
               type="target"
               position={Position.Left}
               id="left-module"
@@ -240,7 +242,7 @@ const MoveCallNode = ({ id, data, selected }) => {
                 borderRadius: "0",
                 border: "none"
               }}
-            />
+            /> */}
             <div className="flex flex-col w-full">
               <Label className="mb-2">Module:</Label>
               <Input
@@ -253,7 +255,7 @@ const MoveCallNode = ({ id, data, selected }) => {
 
           {/* Function Input */}
           <div className="flex items-start gap-2 mb-4 relative">
-            <Handle
+            {/* <Handle
               type="target"
               position={Position.Left}
               id="left-function"
@@ -267,7 +269,7 @@ const MoveCallNode = ({ id, data, selected }) => {
                 borderRadius: "0",
                 border: "none"
               }}
-            />
+            /> */}
             <div className="flex flex-col w-full">
               <Label className="mb-2">Function:</Label>
               <Input
@@ -311,7 +313,7 @@ const MoveCallNode = ({ id, data, selected }) => {
                 <div className="flex gap-2">
                   {/* Select Component for Argument Type */}
                   <Select
-                    value={arg.type}
+                    value={incomingDataEdges.includes(`left-${index}`) ? "result" : arg.type}
                     onValueChange={(value) => handleArgumentChange(value, index, "type")}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -345,11 +347,11 @@ const MoveCallNode = ({ id, data, selected }) => {
 
                   {/* Text Input for Argument Value */}
                   <Input
-                    value={arg.value}
+                    value={incomingDataEdges.includes(`left-${index}`) ? "" : arg.value}
                     onChange={(e) => handleArgumentChange(e.target.value, index, "value")}
-                    placeholder={arg.type == "result" ? "RESULT" : "Enter value..."}
-                    readOnly={arg.type == "result"}
-                    className={arg.type == "result" ? "cursor-not-allowed" : ""}
+                    placeholder={incomingDataEdges.includes(`left-${index}`) || arg.type == "result" ? "RESULT" : "Enter value..."}
+                    readOnly={incomingDataEdges.includes(`left-${index}`) || arg.type == "result"}
+                    className={incomingDataEdges.includes(`left-${index}`) || arg.type == "result" ? "cursor-not-allowed" : ""}
                   />
                 </div>
               </div>
