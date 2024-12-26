@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -18,25 +18,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const SplitCoinsNode = ({ data, selected }) => {
+const SplitCoinsNode = ({ id, data, selected }) => {
   const [coin, setCoin] = useState(data.coin || "");
   const [amounts, setAmounts] = useState(data.amounts || [""]);
+  const { updateNodeData } = useReactFlow();
 
   const addAmount = () => {
-    setAmounts((prev) => [...prev, ""]);
+    const newAmounts = [...amounts, ""];
+    setAmounts(newAmounts);
+    updateNodeData(id, { amounts: newAmounts });
   };
 
   const removeAmount = (index) => {
     if (amounts.length > 1) {
-      setAmounts((prev) => prev.filter((_, i) => i !== index));
+      const newAmounts = amounts.filter((_, i) => i !== index);
+      setAmounts(newAmounts);
+      updateNodeData(id, { amounts: newAmounts });
     }
   };
 
   const handleAmountChange = (value, index) => {
-    setAmounts((prev) =>
-      prev.map((amount, i) => (i === index ? value : amount))
-    );
+    const newAmounts = amounts.map((amount, i) => (i === index ? value : amount));
+    setAmounts(newAmounts);
+    updateNodeData(id, { amounts: newAmounts });
   };
+
+  const handleCoinChange = (value) => {
+    setCoin(value);
+    updateNodeData(id, { coin: value });
+  }
 
   return (
     <Card
@@ -86,7 +96,7 @@ const SplitCoinsNode = ({ data, selected }) => {
             <Input
               placeholder="Enter a coin..."
               value={coin}
-              onChange={(e) => setCoin(e.target.value)}
+              onChange={(e) => handleCoinChange(e.target.value)}
             />
           </div>
         </div>

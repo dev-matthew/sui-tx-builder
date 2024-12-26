@@ -22,7 +22,8 @@ import {
   useEdgesState,
   MarkerType,
   useReactFlow,
-  getOutgoers
+  getOutgoers,
+  useNodesData
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -348,6 +349,8 @@ export default function Main() {
     }
 
     // Flatten nodes here and make sure there are no cycles, etc
+    console.log(nodes);
+    return;
 
     // Construct transaction block by parsing through everything
     try {

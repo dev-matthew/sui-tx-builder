@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -17,25 +17,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const MergeCoinsNode = ({ data, selected }) => {
+const MergeCoinsNode = ({ id, data, selected }) => {
   const [destinationCoin, setDestinationCoin] = useState(data.destinationCoin || "");
   const [sourceCoins, setSourceCoins] = useState(data.sourceCoins || [""]);
+  const { updateNodeData } = useReactFlow();
 
   const addSourceCoin = () => {
-    setSourceCoins((prev) => [...prev, ""]);
+    const newCoins = [...sourceCoins, ""];
+    setSourceCoins(newCoins);
+    updateNodeData(id, {sourceCoins: newCoins});
   };
 
   const removeSourceCoin = (index) => {
     if (sourceCoins.length > 1) {
-      setSourceCoins((prev) => prev.filter((_, i) => i !== index));
+      const newCoins = sourceCoins.filter((_, i) => i !== index);
+      setSourceCoins(newCoins);
+      updateNodeData(id, {sourceCoins: newCoins});
     }
   };
 
   const handleSourceCoinChange = (value, index) => {
-    setSourceCoins((prev) =>
-      prev.map((coin, i) => (i === index ? value : coin))
-    );
+    const newCoins = sourceCoins.map((coin, i) => (i === index ? value : coin));
+    setSourceCoins(newCoins);
+    updateNodeData(id, {sourceCoins: newCoins});
   };
+
+  const handleDestinationCoinChange = (value) => {
+    setDestinationCoin(value);
+    updateNodeData(id, {destinationCoin: value});
+  }
 
   return (
     <Card
@@ -85,7 +95,7 @@ const MergeCoinsNode = ({ data, selected }) => {
             <Input
               placeholder="Enter destination coin..."
               value={destinationCoin}
-              onChange={(e) => setDestinationCoin(e.target.value)}
+              onChange={(e) => handleDestinationCoinChange(e.target.value)}
             />
           </div>
         </div>

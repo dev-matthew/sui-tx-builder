@@ -1,5 +1,5 @@
 import { memo, useState, useRef } from "react";
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const MoveCallNode = ({ data, selected }) => {
+const MoveCallNode = ({ id, data, selected }) => {
   const [packageValue, setPackageValue] = useState(data.package || "");
   const previousPackageValue = useRef(packageValue);
   const [moduleValue, setModuleValue] = useState(data.module || "");
@@ -41,6 +41,7 @@ const MoveCallNode = ({ data, selected }) => {
   const [outputsList, setOutputsList] = useState(data.outputs || []);
   const [loading, setLoading] = useState(false);
   const [packageData, setPackageData] = useState(data.packageData || {});
+  const { updateNodeData } = useReactFlow();
 
   const handlePackageBlur = async () => {
     if (packageValue === previousPackageValue.current) {
@@ -78,36 +79,59 @@ const MoveCallNode = ({ data, selected }) => {
   };
 
   const addArgument = () => {
-    setArgumentsList((prev) => [...prev, { type: undefined, value: "" }]);
+    const newArguments = [...argumentsList, {type: undefined, value: ""}]
+    setArgumentsList(newArguments);
+    updateNodeData(id, {arguments: newArguments});
   };
 
   const removeArgument = (index) => {
     if (argumentsList.length > 0) {
-      setArgumentsList((prev) => prev.filter((_, i) => i !== index));
+      const newArguments = argumentsList.filter((_, i) => i !== index)
+      setArgumentsList(newArguments);
+      updateNodeData(id, {arguments: newArguments});
     }
   };
 
   const handleArgumentChange = (value, index, field) => {
-    setArgumentsList((prev) =>
-      prev.map((arg, i) => (i === index ? { ...arg, [field]: value } : arg))
-    );
+    const newArguments = argumentsList.map((arg, i) => (i === index ? { ...arg, [field]: value } : arg))
+    setArgumentsList(newArguments);
+    updateNodeData(id, {arguments: newArguments});
   };
 
   const addOutput = () => {
-    setOutputsList((prev) => [...prev, { value: "" }]);
+    const newOutputs = [...outputsList, {value: ""}]
+    setOutputsList(newOutputs);
+    updateNodeData(id, {outputs: newOutputs});
   };
 
   const removeOutput = (index) => {
     if (outputsList.length > 0) {
-      setOutputsList((prev) => prev.filter((_, i) => i !== index));
+      const newOutputs = outputsList.filter((_, i) => i !== index)
+      setOutputsList(newOutputs);
+      updateNodeData(id, {outputs: newOutputs});
     }
   };
 
   const handleOutputChange = (value, index) => {
-    setOutputsList((prev) =>
-      prev.map((output, i) => (i === index ? { ...output, value } : output))
-    );
+    const newOutputs = outputsList.map((output, i) => (i === index ? { ...output, value } : output))
+    setOutputsList(newOutputs);
+    updateNodeData(id, {outputs: newOutputs});
   };
+
+  const handlePackageChange = (value) => {
+    setPackageValue(value);
+    updateNodeData(id, {package: value});
+  }
+
+  const handleModuleChange = (value) => {
+    setModuleValue(value);
+    updateNodeData(id, {module: value});
+  }
+
+  const handleFunctionChange = (value) => {
+    setFunctionValue(value);
+    updateNodeData(id, {function: value});
+  }
 
   return (
     <Card
@@ -193,7 +217,7 @@ const MoveCallNode = ({ data, selected }) => {
               {/* Input on the next line */}
               <Input
                 value={packageValue}
-                onChange={(e) => setPackageValue(e.target.value)}
+                onChange={(e) => handlePackageChange(e.target.value)}
                 placeholder="Enter package address..."
                 onBlur={handlePackageBlur}
               />
@@ -221,7 +245,7 @@ const MoveCallNode = ({ data, selected }) => {
               <Label className="mb-2">Module:</Label>
               <Input
                 value={moduleValue}
-                onChange={(e) => setModuleValue(e.target.value)}
+                onChange={(e) => handleModuleChange(e.target.value)}
                 placeholder="Enter module name..."
               />
             </div>
@@ -248,7 +272,7 @@ const MoveCallNode = ({ data, selected }) => {
               <Label className="mb-2">Function:</Label>
               <Input
                 value={functionValue}
-                onChange={(e) => setFunctionValue(e.target.value)}
+                onChange={(e) => handleFunctionChange(e.target.value)}
                 placeholder="Enter function name..."
               />
             </div>

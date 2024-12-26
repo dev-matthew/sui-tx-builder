@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -18,25 +18,35 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const TransferObjectsNode = ({ data, selected }) => {
+const TransferObjectsNode = ({ id, data, selected }) => {
   const [inputs, setInputs] = useState(data.objects || [""]);
   const [to, setTo] = useState(data.to || "");
+  const { updateNodeData } = useReactFlow();
 
   const addInput = () => {
-    setInputs((prev) => [...prev, ""]);
+    const newInputs = [...inputs, ""]
+    setInputs(newInputs);
+    updateNodeData(id, { objects: newInputs });
   };
 
   const removeInput = (index) => {
     if (inputs.length > 1) {
-      setInputs((prev) => prev.filter((_, i) => i !== index));
+      const newInputs = inputs.filter((_, i) => i !== index);
+      setInputs(newInputs);
+      updateNodeData(id, { objects: newInputs });
     }
   };
 
   const handleInputChange = (value, index) => {
-    setInputs((prev) =>
-      prev.map((input, i) => (i === index ? value : input))
-    );
+    const newInputs = inputs.map((input, i) => (i === index ? value : input));
+    setInputs(newInputs);
+    updateNodeData(id, { objects: newInputs });
   };
+
+  const handleToChange = (value) => {
+    setTo(value);
+    updateNodeData(id, { to: value });
+  }
 
   return (
     <Card
@@ -83,8 +93,7 @@ const TransferObjectsNode = ({ data, selected }) => {
           />
           <div className="flex flex-col w-full">
             <Label className="mb-2">Destination Address:</Label>
-
-            <Input placeholder="Enter an address..." value={to} onChange={(e) => setTo(e.target.value)} />
+            <Input placeholder="Enter an address..." value={to} onChange={(e) => handleToChange(e.target.value)} />
           </div>
         </div>
 

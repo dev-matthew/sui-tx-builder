@@ -1,5 +1,5 @@
 import { memo, useState, useRef } from "react";
-import { Handle, Position } from '@xyflow/react';
+import { Handle, Position, useReactFlow } from '@xyflow/react';
 import {
   Card,
   CardContent,
@@ -32,23 +32,28 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-const MakeMoveVecNode = ({ data, selected }) => {
+const MakeMoveVecNode = ({ id, data, selected }) => {
   const [argumentsList, setArgumentsList] = useState(data.arguments || [{type: undefined, value: ""}]);
+  const { updateNodeData } = useReactFlow();
 
   const addArgument = () => {
-    setArgumentsList((prev) => [...prev, { type: undefined, value: "" }]);
+    const newArguments = [...argumentsList, {type: undefined, value: ""}]
+    setArgumentsList(newArguments);
+    updateNodeData(id, {arguments: newArguments});
   };
 
   const removeArgument = (index) => {
-    if (argumentsList.length > 1) {
-      setArgumentsList((prev) => prev.filter((_, i) => i !== index));
+    if (argumentsList.length > 0) {
+      const newArguments = argumentsList.filter((_, i) => i !== index)
+      setArgumentsList(newArguments);
+      updateNodeData(id, {arguments: newArguments});
     }
   };
 
   const handleArgumentChange = (value, index, field) => {
-    setArgumentsList((prev) =>
-      prev.map((arg, i) => (i === index ? { ...arg, [field]: value } : arg))
-    );
+    const newArguments = argumentsList.map((arg, i) => (i === index ? { ...arg, [field]: value } : arg))
+    setArgumentsList(newArguments);
+    updateNodeData(id, {arguments: newArguments});
   };
 
   return (
