@@ -11,6 +11,7 @@ import { blocks } from "@/components/blocks";
 import EmptyNode from "@/components/nodes/EmptyNode";
 import { useToast } from "@/components/hooks/use-toast";
 import { Ellipsis } from "lucide-react";
+import { ToastAction } from "@/components/ui/toast"
 
 import {
   ReactFlow,
@@ -314,7 +315,7 @@ export default function Main() {
           case "TransferObjects":
             customData = {
               to: getTypeAndInput(inputs, func[id][1])[1],
-              objects: func[id][0].map(item => getTypeAndInput(inputs, item))[1],
+              objects: func[id][0].map(item => getTypeAndInput(inputs, item)[1]),
               backwardEdges: getBackwardEdges(func[id][0], func[id][1], "to")
             }
             break;
@@ -426,7 +427,7 @@ export default function Main() {
     const parseMoveValue = (targetId, targetHandle, type, value) => {
       // If there is an incoming edge to targetId/targetHandle, find the source and use that to index into results
       // This length will never be greater than 1 because of onConnect
-      let incomingDataEdges = edges.filter(edge => {edge.target == targetId && edge.targetHandle == targetHandle});
+      let incomingDataEdges = edges.filter(edge => edge.target == targetId && edge.targetHandle == targetHandle);
       if (incomingDataEdges.length > 0) {
         let sourceId = incomingDataEdges[0].source; // this is the source id, so we can find its result
         let sourceHandle = incomingDataEdges[0].sourceHandle; // we will extract the index from here (left-3 for example)
@@ -450,40 +451,55 @@ export default function Main() {
     try {
       sequence.forEach((node) => {
         let result = null;
-        switch (node.id) {
+        switch (node.type) {
 
           case "TransferObjects":
-            result = tx.transferObjects({
-              objects: node.data.objects.map((object, i) => parseMoveValue(node.id, `left-${i}`, "object", object)), // array of tx values
-              address: parseMoveValue(node.id, "left-to", "address", node.data.to),  // single tx value
-            })
+            let objects = node.data.objects.map((object, i) => parseMoveValue(node.id, `left-${i}`, "object", object));
+            let address = parseMoveValue(node.id, "left-to", "address", node.data.to);
+            console.log("Transfer Objects:", objects, address);
+            result = tx.transferObjects(
+              objects, // array of tx values
+              address,  // single tx value
+            )
             break;
 
           case "MoveCall":
-            result = tx.moveCall({
-              target: `${node.data.package}::${node.data.module}::${node.data.function}`,   // string
-              arguments: node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value)),  // array of tx values
-              typeArguments: node.data.arguments.filter(arg => arg.type == "type").map(arg => arg.value) // array of strings
+            let target = `${node.data.package}::${node.data.module}::${node.data.function}`;
+            let argumentsIn = node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value));
+            let typeArguments = node.data.arguments.filter(arg => arg.type == "type").map(arg => arg.value);
+            console.log("Move Call:", target, argumentsIn, typeArguments);
+            result = tx.moveCall({  // this is dictionary input
+              target: target,   // string
+              arguments: argumentsIn,  // array of tx values
+              typeArguments: typeArguments // array of strings
             })
             break;
 
           case "MergeCoins":
-            result = tx.mergeCoins({
-              destination: parseMoveValue(node.id, "left-destination", "object", node.data.destinationCoin),  // single tx value
-              sources: node.data.sourceCoins.map((coin, i) => parseMoveValue(node.id, `left-${i}`, "object", coin)) // array of tx values
-            })
+            let destination = parseMoveValue(node.id, "left-destination", "object", node.data.destinationCoin);
+            let sources = node.data.sourceCoins.map((coin, i) => parseMoveValue(node.id, `left-${i}`, "object", coin));
+            console.log("Merge Coins:", destination, sources)
+            result = tx.mergeCoins(
+              destination,  // single tx value
+              sources  // array of tx values
+            )
             break;
 
           case "SplitCoins":
-            result = tx.mergeCoins({
-              coin: parseMoveValue(node.id, "left-coin", "object", node.data.coin), // single tx value
-              amounts: node.data.amounts.map((amount, i) => parseMoveValue(node.id, `left-${i}`, "u64", amount)) // array of tx values
-            })
+            let coin = parseMoveValue(node.id, "left-coin", "object", node.data.coin);
+            let amounts = node.data.amounts.map((amount, i) => parseMoveValue(node.id, `left-${i}`, "u64", amount));
+            console.log("Split Coins:", coin, amounts);
+            result = tx.splitCoins(
+              coin, // single tx value
+              amounts  // array of tx values
+            )
             break;
 
           case "MakeMoveVec":
-            result = tx.makeMoveVec({
-              elements: node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value))  // array of tx values
+            let elements = node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value));
+            console.log("Make Move Vector:", elements);
+            result = tx.makeMoveVec({ // this is dictionary input
+              elements: elements  // array of tx values
             })
             break;
         }
@@ -496,7 +512,9 @@ export default function Main() {
       console.log("Resdata:", resData);
       toast({
         title: `Transaction executed!`,
-        description: `https://suiscan.xyz/mainnet/tx/${resData.digest}`
+        action: <ToastAction altText="View" onClick={() => {
+          window.open(`https://suiscan.xyz/mainnet/tx/${resData.digest}`, "_blank");
+        }}>View</ToastAction>
       });
     } catch(e) {
       toast({

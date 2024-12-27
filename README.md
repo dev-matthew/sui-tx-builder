@@ -9,7 +9,7 @@ npm run dev
 TODO List:
 - What are "type arguments"?
 - What is the difference between tx.makeMoveVec and tx.pure.vector? Is it that the first one is used for vectors of objects and different types?
-- Finish executing transactions (all that's left is getting the arguments)
+- Test the executing transactions functionality thoroughly
 - How do we view the outputs (and/or get the values of Results/Nested Results) of individual transactions within the transaction block, after executing the entire block?
 - What should our readable transaction summary look like?
 - What templates do we want to have? NFT mint, etc
