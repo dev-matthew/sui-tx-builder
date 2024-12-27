@@ -331,6 +331,10 @@ const MoveCallNode = ({ id, data, selected }) => {
                         <SelectItem value="result">result</SelectItem>
                       </SelectGroup>
                       <SelectGroup>
+                        <SelectLabel>Type Argument</SelectLabel>
+                        <SelectItem value="type">type</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
                         <SelectLabel>Pure</SelectLabel>
                         <SelectItem value="address">address</SelectItem>
                         <SelectItem value="bool">bool</SelectItem>

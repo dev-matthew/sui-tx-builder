@@ -1,18 +1,19 @@
 # Sui Transaction Builder
 
 ```
+# First create the env file according to .env.example
+npm install
 npm run dev
 ```
 
 TODO List:
-- Understand/handle "type arguments"
-- Handle vectors / options?
-  - This is difficult because they can be infinitely nested, so we would need variable nodes to represent them maybe
-- Display outputs correctly if possible (can do this after we finish the executing transactions functionality?)
-- Executing transactions
-- Create templates
-- Readable transaction summary
-- Clean up code / documentation
+- What are "type arguments"?
+- What is the difference between tx.makeMoveVec and tx.pure.vector? Is it that the first one is used for vectors of objects and different types?
+- Finish executing transactions (all that's left is getting the arguments)
+- How do we view the outputs (and/or get the values of Results/Nested Results) of individual transactions within the transaction block, after executing the entire block?
+- What should our readable transaction summary look like?
+- What templates do we want to have? NFT mint, etc
+- Clean up code and make documentation
 
 Resources: 
 - https://sdk.mystenlabs.com/typescript/transaction-building/basics

@@ -420,54 +420,74 @@ export default function Main() {
     }
     console.log("Sequence:", sequence);
 
+    const tx = new Transaction();
+    let results = {}; // map node ID to the result list
+
+    const parseMoveValue = (targetId, targetHandle, type, value) => {
+      // If there is an incoming edge to targetId/targetHandle, find the source and use that to index into results
+      // This length will never be greater than 1 because of onConnect
+      let incomingDataEdges = edges.filter(edge => {edge.target == targetId && edge.targetHandle == targetHandle});
+      if (incomingDataEdges.length > 0) {
+        let sourceId = incomingDataEdges[0].source; // this is the source id, so we can find its result
+        let sourceHandle = incomingDataEdges[0].sourceHandle; // we will extract the index from here (left-3 for example)
+        let index = parseInt(sourceHandle.split("-")[1], 10);
+        return results[sourceId][index];
+      }
+
+      // Check if it's gas coin
+      if (value.toLowerCase() == "tx.gas" || value.toLowerCase() == "GasCoin") {
+        return tx.gas;
+      }
+
+      // Otherwise, switch on type
+      if (type == "object") {
+        return tx.object(value);
+      } else {
+        return tx.pure(type, value);
+      }
+    }
+
     try {
-      let results = [];
-      const tx = new Transaction();
-      // const mint = tx.moveCall({
-      //   target: '0x5b45da03d42b064f5e051741b6fed3b29eb817c7923b83b92f37a1d2abf4fbab::nft::mint',
-      //   arguments: [tx.pure.string("name"), tx.pure.string("description"), tx.pure.string("url")],
-      // });
       sequence.forEach((node) => {
         let result = null;
         switch (node.id) {
 
           case "TransferObjects":
             result = tx.transferObjects({
-              objects: [],
-              address: ""
+              objects: node.data.objects.map((object, i) => parseMoveValue(node.id, `left-${i}`, "object", object)), // array of tx values
+              address: parseMoveValue(node.id, "left-to", "address", node.data.to),  // single tx value
             })
             break;
 
           case "MoveCall":
             result = tx.moveCall({
-              target: "",
-              arguments: [],
-              typeArguments: []
+              target: `${node.data.package}::${node.data.module}::${node.data.function}`,   // string
+              arguments: node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value)),  // array of tx values
+              typeArguments: node.data.arguments.filter(arg => arg.type == "type").map(arg => arg.value) // array of strings
             })
             break;
 
           case "MergeCoins":
             result = tx.mergeCoins({
-              destination: "",
-              sources: []
+              destination: parseMoveValue(node.id, "left-destination", "object", node.data.destinationCoin),  // single tx value
+              sources: node.data.sourceCoins.map((coin, i) => parseMoveValue(node.id, `left-${i}`, "object", coin)) // array of tx values
             })
             break;
 
           case "SplitCoins":
             result = tx.mergeCoins({
-              coin: "",
-              amounts: []
+              coin: parseMoveValue(node.id, "left-coin", "object", node.data.coin), // single tx value
+              amounts: node.data.amounts.map((amount, i) => parseMoveValue(node.id, `left-${i}`, "u64", amount)) // array of tx values
             })
             break;
 
           case "MakeMoveVec":
             result = tx.makeMoveVec({
-              type: "",
-              elements: []
+              elements: node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value))  // array of tx values
             })
             break;
         }
-        results.push(result);
+        results[node.id] = result;
       });
 
       // Setting the following line gives us more descriptive errors, but isn't necessary for execution
