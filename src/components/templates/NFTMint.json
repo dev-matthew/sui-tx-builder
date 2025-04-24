@@ -1,0 +1,47 @@
+{
+    "result": {
+        "transaction": {
+            "data": {
+                "transaction": {
+                    "inputs": [
+                        {
+                            "type": "pure",
+                            "valueType": "string",
+                            "value": "NAME"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "string",
+                            "value": "DESCRIPTION"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "string",
+                            "value": "URL"
+                        }
+                    ],
+                    "transactions": [
+                        {
+                            "MoveCall": {
+                                "package": "0x2",
+                                "module": "nft",
+                                "function": "mint",
+                                "arguments": [
+                                    {
+                                        "Input": 0
+                                    },
+                                    {
+                                        "Input": 1
+                                    },
+                                    {
+                                        "Input": 2
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

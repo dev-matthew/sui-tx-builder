@@ -107,7 +107,7 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
         </SidebarGroup>
         <Blocks onAddNode={onAddNode}/>
         {/* <Variables /> */}
-        <Templates />
+        <Templates onAddTemplate={onSearch}/>
       </SidebarContent>
       <SidebarFooter>
         <div className="flex h-5 items-center space-x-4 text-sm justify-between w-full">

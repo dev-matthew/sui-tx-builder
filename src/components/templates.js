@@ -10,10 +10,13 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 
 import { ChevronDown, FilePlus2, HandCoins, CircleDollarSign } from "lucide-react";
 
+import NFTMint from "@/components/templates/NFTMint.json"
+
 const templates = [
     {
         title: "NFT Mint",
-        icon: FilePlus2
+        icon: FilePlus2,
+        data: NFTMint
     },
     {
         title: "Create Token",
@@ -25,7 +28,7 @@ const templates = [
     }
 ]
 
-export function Templates() {
+export function Templates({ onAddTemplate }) {
     return (
         <Collapsible defaultOpen className="group/collapsible">
             <SidebarGroup>
@@ -40,7 +43,7 @@ export function Templates() {
                         <SidebarMenu>
                             {templates.map((item, index) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild className="hover:cursor-pointer">
+                                    <SidebarMenuButton asChild className="hover:cursor-pointer" onClick={() => onAddTemplate(item.data)}>
                                         <span><item.icon className="text-sui" />{item.title}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>

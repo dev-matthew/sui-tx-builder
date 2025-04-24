@@ -64,7 +64,31 @@ export default function Main() {
     x = undefined,
     y = undefined,
     addPrevEdge = false,
-    customData = {},
+    customData = {
+      // TransferObjects Defaults
+      objects: [""],
+      to: "",
+
+      // SplitCoins Defaults
+      coin: "",
+      amounts: [""],
+
+      // MoveCall Defaults
+      package: "",
+      module: "",
+      function: "",
+      arguments: [],
+      outputs: [],
+      packageData: {},
+
+      // MergeCoins Defaults
+      destinationCoin: "",
+      sourceCoins: [""],
+
+      // MakeMoveVec Defaults
+      vecArguments: [{type: undefined, value: ""}],
+
+    },
     start = 0
   ) => {
     setNodes((prevNodes) => {
@@ -269,6 +293,7 @@ export default function Main() {
 
   const search = (data) => {
     console.log("Displaying searched data:", data);
+    if (!data) return;
     /*  The first thing we do is go through every transaction and see what args it is using.
         If it is using outputs from previous transactions as args for this one, we update the
         output count for the previous transaction so that we can create an edge later on.
@@ -352,7 +377,7 @@ export default function Main() {
             break;
           case "MakeMoveVec":
             customData = {
-              arguments: func[id][1].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
+              vecArguments: func[id][1].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
               backwardEdges: getBackwardEdges(func[id][1])
             }
             break;
@@ -436,7 +461,7 @@ export default function Main() {
       }
 
       // Check if it's gas coin
-      if (value.toLowerCase() == "tx.gas" || value.toLowerCase() == "GasCoin") {
+      if (value.toLowerCase() == "tx.gas" || value.toLowerCase() == "gascoin" || value.toLowerCase() == "gas") {
         return tx.gas;
       }
 
@@ -454,6 +479,7 @@ export default function Main() {
         switch (node.type) {
 
           case "TransferObjects":
+            // node.data.objects is not being set by the incoming edge
             let objects = node.data.objects.map((object, i) => parseMoveValue(node.id, `left-${i}`, "object", object));
             let address = parseMoveValue(node.id, "left-to", "address", node.data.to);
             console.log("Transfer Objects:", objects, address);
@@ -496,10 +522,10 @@ export default function Main() {
             break;
 
           case "MakeMoveVec":
-            let elements = node.data.arguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value));
+            let elements = node.data.vecArguments.filter(arg => arg.type != "type").map((arg, i) => parseMoveValue(node.id, `left-${i}`, arg.type, arg.value));
             console.log("Make Move Vector:", elements);
             result = tx.makeMoveVec({ // this is dictionary input
-              elements: elements  // array of tx values
+              elements: elements  // array of tx values 
             })
             break;
         }
@@ -517,6 +543,7 @@ export default function Main() {
         }}>View</ToastAction>
       });
     } catch(e) {
+      console.log(e);
       toast({
         title: `Couldn't execute transaction`,
         description: `${e}`,

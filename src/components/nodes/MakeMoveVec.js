@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/tooltip"
 
 const MakeMoveVecNode = ({ id, data, selected }) => {
-  const [argumentsList, setArgumentsList] = useState(data.arguments || [{type: undefined, value: ""}]);
+  const [argumentsList, setArgumentsList] = useState(data.vecArguments || [{type: undefined, value: ""}]);
   const { updateNodeData } = useReactFlow();
   const edges = useEdges();
   let incomingDataEdges = edges.filter((edge) => edge.target == id && edge.targetHandle.includes("left")).map((edge) => edge.targetHandle);
@@ -36,14 +36,14 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
   const addArgument = () => {
     const newArguments = [...argumentsList, {type: undefined, value: ""}]
     setArgumentsList(newArguments);
-    updateNodeData(id, {arguments: newArguments});
+    updateNodeData(id, {vecArguments: newArguments});
   };
 
   const removeArgument = (index) => {
     if (argumentsList.length > 0) {
       const newArguments = argumentsList.filter((_, i) => i !== index)
       setArgumentsList(newArguments);
-      updateNodeData(id, {arguments: newArguments});
+      updateNodeData(id, {vecArguments: newArguments});
       data.removeHandleCallback(id, `left-${index}`);
     }
   };
@@ -51,7 +51,7 @@ const MakeMoveVecNode = ({ id, data, selected }) => {
   const handleArgumentChange = (value, index, field) => {
     const newArguments = argumentsList.map((arg, i) => (i === index ? { ...arg, [field]: value } : arg))
     setArgumentsList(newArguments);
-    updateNodeData(id, {arguments: newArguments});
+    updateNodeData(id, {vecArguments: newArguments});
   };
 
   return (
