@@ -140,6 +140,50 @@ export default function Main() {
     });
   };
 
+  const applyTemplate = (template) => {
+    // Clear existing workspace
+    setNodes([]);
+    setEdges([]);
+    
+    // Add template nodes with a longer delay to ensure they're created
+    setTimeout(() => {
+      template.nodes.forEach((nodeTemplate, index) => {
+        const block = blocks.find(b => b.id === nodeTemplate.type) || {
+          id: nodeTemplate.type,
+          title: nodeTemplate.type,
+          icon: Ellipsis,
+          node: EmptyNode
+        };
+        
+        addNode(
+          block,
+          nodeTemplate.position.x,
+          nodeTemplate.position.y,
+          false, // Don't auto-connect
+          nodeTemplate.data,
+          0 // start index
+        );
+      });
+      
+      // Add template edges after nodes are definitely created
+      setTimeout(() => {
+        template.edges.forEach((edge) => {
+          onConnect({
+            source: edge.source,
+            target: edge.target,
+            sourceHandle: edge.sourceHandle,
+            targetHandle: edge.targetHandle
+          });
+        });
+        
+        toast({
+          title: "Template Applied",
+          description: `${template.name} template has been loaded`
+        });
+      }, 200); // Increased delay
+    }, 50); // Small delay before creating nodes
+  };
+
   const hasCycleWrapper = (sourceIn, targetIn) => {
     const nodes = getNodes();
     const edges = getEdges();
@@ -398,20 +442,21 @@ export default function Main() {
     });
   }
 
+
   const calculateSequence = () => {
     if (nodes.length === 0) {
       setSequence([]);
       return;
     }
-
+  
     let dataEdges = edges.filter((edge) => edge.sourceHandle != "bottom" && edge.sourceHandle != "top");
     let controlEdges = edges.filter((edge) => edge.sourceHandle == "bottom" || edge.sourceHandle == "top");
-
+  
     let nodeDictionary = nodes.reduce((acc, node) => {
       acc[node.id] = node;
       return acc;
     }, {});
-
+  
     let path = {}
     let incomingEdges = nodes.reduce((acc, node) => {
       acc[node.id] = 0;
@@ -421,18 +466,44 @@ export default function Main() {
       acc[node.id] = 0;
       return acc;
     }, {});
-
+  
     controlEdges.forEach((edge) => {
       incomingEdges[edge.target] += 1;
       outgoingEdges[edge.source] += 1;
       path[edge.source] = edge.target;
     });
-
-    let sequence = [nodeDictionary[Object.keys(incomingEdges).filter(key => incomingEdges[key] == 0)[0]]];
-    for (let i = 1; i < nodes.length; i += 1) {
-      sequence.push(nodeDictionary[path[sequence[i - 1].id]])
+  
+    // Find the starting node (node with no incoming edges)
+    const startingNodeId = Object.keys(incomingEdges).find(key => incomingEdges[key] == 0);
+    
+    // Safety check - make sure we have a starting node
+    if (!startingNodeId || !nodeDictionary[startingNodeId]) {
+      console.warn("No starting node found or starting node doesn't exist in nodeDictionary");
+      setSequence([]);
+      return;
     }
-
+  
+    let sequence = [nodeDictionary[startingNodeId]];
+    
+    for (let i = 1; i < nodes.length; i += 1) {
+      const currentNode = sequence[i - 1];
+      
+      // Safety checks
+      if (!currentNode || !currentNode.id) {
+        console.warn(`Current node at index ${i-1} is undefined or has no id`);
+        break;
+      }
+      
+      const nextNodeId = path[currentNode.id];
+      
+      if (!nextNodeId || !nodeDictionary[nextNodeId]) {
+        console.warn(`Next node id ${nextNodeId} not found in path or nodeDictionary`);
+        break;
+      }
+      
+      sequence.push(nodeDictionary[nextNodeId]);
+    }
+  
     setSequence(sequence);
   };
 
@@ -491,6 +562,8 @@ export default function Main() {
     //   sequence.push(nodeDictionary[path[sequence[i - 1].id]])
     // }
     console.log("Sequence:", sequence);
+
+
 
     const tx = new Transaction();
     let results = {}; // map node ID to the result list
@@ -578,6 +651,8 @@ export default function Main() {
         results[node.id] = result;
       });
 
+
+
       // Setting the following line gives us more descriptive errors, but isn't necessary for execution
       // tx.setGasBudget(100000000);
       const resData = await wallet.signAndExecuteTransaction({ transaction: tx });
@@ -607,6 +682,7 @@ export default function Main() {
         onAddNode={addNode}
         onSearch={search}
         toast={toast}
+        onApplyTemplate = {applyTemplate}
       />
       <div className="w-full h-screen">
         <ReactFlow
@@ -624,7 +700,7 @@ export default function Main() {
           <Controls position="bottom-left" />
           <Panel position="top-left"><SidebarTrigger /></Panel>
           {showSummary && (
-            <Panel position="bottom-center">
+            <Panel  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm"> 
               <TransactionSummary nodes={nodes} sequence={sequence} />
             </Panel>
           )}
