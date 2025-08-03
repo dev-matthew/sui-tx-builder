@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ConnectButton, useWallet } from '@suiet/wallet-kit';
 import { Transaction } from "@mysten/sui/transactions";
@@ -12,6 +12,7 @@ import EmptyNode from "@/components/nodes/EmptyNode";
 import { useToast } from "@/components/hooks/use-toast";
 import { Ellipsis, FilePlus2 } from "lucide-react";
 import { ToastAction } from "@/components/ui/toast"
+import { TransactionSummary } from "@/components/TransactionSummary";
 
 import {
   ReactFlow,
@@ -30,6 +31,8 @@ import '@xyflow/react/dist/style.css';
 export default function Main() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [sequence, setSequence] = useState([]);
+  const [showSummary, setShowSummary] = useState(false);
   const { getNodes, getEdges } = useReactFlow();
   const { toast } = useToast();
   const wallet = useWallet();
@@ -86,14 +89,14 @@ export default function Main() {
       sourceCoins: [""],
 
       // MakeMoveVec Defaults
-      vecArguments: [{type: undefined, value: ""}],
+      vecArguments: [{ type: undefined, value: "" }],
 
     },
     start = 0
   ) => {
     setNodes((prevNodes) => {
       const newNodeId = `${block.id}-${prevNodes.length}`;
-  
+
       const newNode = {
         id: newNodeId,
         position: {
@@ -109,7 +112,7 @@ export default function Main() {
         type: block.id,
         selectable: true,
       };
-  
+
       if (addPrevEdge && prevNodes.length > 0) {
         const prevNodeId = prevNodes[prevNodes.length - 1].id;
         onConnect({
@@ -121,7 +124,7 @@ export default function Main() {
       }
 
       if (customData.backwardEdges) {
-        customData.backwardEdges.forEach(function(edge, index) {
+        customData.backwardEdges.forEach(function (edge, index) {
           // edge is an array with 2 values (index of node, index of output)
           const prevNodeId = prevNodes[edge[0] + start].id;
           onConnect({
@@ -135,6 +138,50 @@ export default function Main() {
 
       return [...prevNodes, newNode];
     });
+  };
+
+  const applyTemplate = (template) => {
+    // Clear existing workspace
+    setNodes([]);
+    setEdges([]);
+    
+    // Add template nodes with a longer delay to ensure they're created
+    setTimeout(() => {
+      template.nodes.forEach((nodeTemplate, index) => {
+        const block = blocks.find(b => b.id === nodeTemplate.type) || {
+          id: nodeTemplate.type,
+          title: nodeTemplate.type,
+          icon: Ellipsis,
+          node: EmptyNode
+        };
+        
+        addNode(
+          block,
+          nodeTemplate.position.x,
+          nodeTemplate.position.y,
+          false, // Don't auto-connect
+          nodeTemplate.data,
+          0 // start index
+        );
+      });
+      
+      // Add template edges after nodes are definitely created
+      setTimeout(() => {
+        template.edges.forEach((edge) => {
+          onConnect({
+            source: edge.source,
+            target: edge.target,
+            sourceHandle: edge.sourceHandle,
+            targetHandle: edge.targetHandle
+          });
+        });
+        
+        toast({
+          title: "Template Applied",
+          description: `${template.name} template has been loaded`
+        });
+      }, 200); // Increased delay
+    }, 50); // Small delay before creating nodes
   };
 
   const hasCycleWrapper = (sourceIn, targetIn) => {
@@ -258,7 +305,7 @@ export default function Main() {
   }
 
   const extractArgsCounts = (args, countArr) => {
-    args.forEach(function(arg, index) {
+    args.forEach(function (arg, index) {
       if (arg != undefined && typeof arg != "string") {
         if ("NestedResult" in arg) {
           countArr[arg["NestedResult"][0]] = Math.max(countArr[arg["NestedResult"][0]], arg["NestedResult"][1] + 1)
@@ -271,7 +318,7 @@ export default function Main() {
 
   const getBackwardEdges = (args, singleArg = undefined, argTagSuffix = "") => {
     let backwardEdgesList = [];
-    args.forEach(function(arg, index_arg) {
+    args.forEach(function (arg, index_arg) {
       if (arg != undefined && typeof arg != "string") {
         if ("NestedResult" in arg) {
           backwardEdgesList.push([arg["NestedResult"][0], `right-${arg["NestedResult"][1]}`, `left-${index_arg}`])
@@ -301,11 +348,11 @@ export default function Main() {
     let functions = data.result.transaction.data.transaction.transactions;
     let inputs = data.result.transaction.data.transaction.inputs;
     let outputCountsPerNode = new Array(functions.length).fill(0);
-    functions.forEach(function(func, index) {
+    functions.forEach(function (func, index) {
       let id = Object.keys(func)[0];
       let block = blocks.find(block => block.id === id);
       if (block) {
-        switch(id) {
+        switch (id) {
           case "MoveCall":
             extractArgsCounts(func[id]["arguments"], outputCountsPerNode);
             break;
@@ -331,7 +378,7 @@ export default function Main() {
     let y = Math.random() * 100;
     let start = nodes.length;
 
-    functions.forEach(function(func, index) {
+    functions.forEach(function (func, index) {
       let id = Object.keys(func)[0];
       let block = blocks.find(block => block.id === id);
       if (block) {
@@ -349,8 +396,8 @@ export default function Main() {
               package: func[id]["package"],
               module: func[id]["module"],
               function: func[id]["function"],
-              arguments: func[id]["arguments"].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
-              outputs: new Array(outputCountsPerNode[index]).fill({value: ""}),
+              arguments: func[id]["arguments"].map(item => ({ "type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1] })),
+              outputs: new Array(outputCountsPerNode[index]).fill({ value: "" }),
               backwardEdges: getBackwardEdges(func[id]["arguments"]),
               packageData: data.addedMetadata?.[func[id]["package"]]
             }
@@ -385,7 +432,7 @@ export default function Main() {
             break;
           case "MakeMoveVec":
             customData = {
-              vecArguments: func[id][1].map(item => ({"type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1]})),
+              vecArguments: func[id][1].map(item => ({ "type": getTypeAndInput(inputs, item)[0], "value": getTypeAndInput(inputs, item)[1] })),
               backwardEdges: getBackwardEdges(func[id][1])
             }
             break;
@@ -402,6 +449,76 @@ export default function Main() {
       x += 350;
     });
   }
+
+
+  const calculateSequence = () => {
+    if (nodes.length === 0) {
+      setSequence([]);
+      return;
+    }
+  
+    let dataEdges = edges.filter((edge) => edge.sourceHandle != "bottom" && edge.sourceHandle != "top");
+    let controlEdges = edges.filter((edge) => edge.sourceHandle == "bottom" || edge.sourceHandle == "top");
+  
+    let nodeDictionary = nodes.reduce((acc, node) => {
+      acc[node.id] = node;
+      return acc;
+    }, {});
+  
+    let path = {}
+    let incomingEdges = nodes.reduce((acc, node) => {
+      acc[node.id] = 0;
+      return acc;
+    }, {});
+    let outgoingEdges = nodes.reduce((acc, node) => {
+      acc[node.id] = 0;
+      return acc;
+    }, {});
+  
+    controlEdges.forEach((edge) => {
+      incomingEdges[edge.target] += 1;
+      outgoingEdges[edge.source] += 1;
+      path[edge.source] = edge.target;
+    });
+  
+    // Find the starting node (node with no incoming edges)
+    const startingNodeId = Object.keys(incomingEdges).find(key => incomingEdges[key] == 0);
+    
+    // Safety check - make sure we have a starting node
+    if (!startingNodeId || !nodeDictionary[startingNodeId]) {
+      console.warn("No starting node found or starting node doesn't exist in nodeDictionary");
+      setSequence([]);
+      return;
+    }
+  
+    let sequence = [nodeDictionary[startingNodeId]];
+    
+    for (let i = 1; i < nodes.length; i += 1) {
+      const currentNode = sequence[i - 1];
+      
+      // Safety checks
+      if (!currentNode || !currentNode.id) {
+        console.warn(`Current node at index ${i-1} is undefined or has no id`);
+        break;
+      }
+      
+      const nextNodeId = path[currentNode.id];
+      
+      if (!nextNodeId || !nodeDictionary[nextNodeId]) {
+        console.warn(`Next node id ${nextNodeId} not found in path or nodeDictionary`);
+        break;
+      }
+      
+      sequence.push(nodeDictionary[nextNodeId]);
+    }
+  
+    setSequence(sequence);
+  };
+
+
+  useEffect(() => {
+    calculateSequence();
+  }, [nodes, edges]);
 
   const executeTransaction = async () => {
     if (!wallet.connected) {
@@ -448,11 +565,13 @@ export default function Main() {
       return;
     }
 
-    let sequence = [nodeDictionary[Object.keys(incomingEdges).filter(key => incomingEdges[key] == 0)[0]]];
-    for (let i = 1; i < nodes.length; i += 1) {
-      sequence.push(nodeDictionary[path[sequence[i - 1].id]])
-    }
+    // let sequence = [nodeDictionary[Object.keys(incomingEdges).filter(key => incomingEdges[key] == 0)[0]]];
+    // for (let i = 1; i < nodes.length; i += 1) {
+    //   sequence.push(nodeDictionary[path[sequence[i - 1].id]])
+    // }
     console.log("Sequence:", sequence);
+
+
 
     const tx = new Transaction();
     let results = {}; // map node ID to the result list
@@ -540,9 +659,11 @@ export default function Main() {
         results[node.id] = result;
       });
 
+
+
       // Setting the following line gives us more descriptive errors, but isn't necessary for execution
       // tx.setGasBudget(100000000);
-      const resData = await wallet.signAndExecuteTransaction({transaction: tx});
+      const resData = await wallet.signAndExecuteTransaction({ transaction: tx });
       console.log("Resdata:", resData);
       toast({
         title: `Transaction executed!`,
@@ -550,7 +671,7 @@ export default function Main() {
           window.open(`https://suiscan.xyz/mainnet/tx/${resData.digest}`, "_blank");
         }}>View</ToastAction>
       });
-    } catch(e) {
+    } catch (e) {
       console.log(e);
       toast({
         title: `Couldn't execute transaction`,
@@ -562,48 +683,66 @@ export default function Main() {
     }
   }
 
+
   return (
     <>
       <AppSidebar
         onAddNode={addNode}
         onSearch={search}
         toast={toast}
+        onApplyTemplate = {applyTemplate}
       />
       <div className="w-full h-screen">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            nodesConnectable={true}
-            defaultViewport={{ zoom: 1, x: 0, y: 0 }}
-            nodeTypes={nodeTypes}
-            edgesFocusable={true}
-          >
-            <Background />
-            <Controls position="bottom-left"/>
-            <Panel position="top-left"><SidebarTrigger /></Panel>
-            <Panel position="top-right">
-              <div className="flex">
-                <ConnectButton style={{
-                  fontSize: "14px",
-                  marginRight: "16px"
-                }}> Connect Wallet </ConnectButton>
-                <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button" style={{
-                  borderRadius: "16px",
-                  height: "48px",
-                  paddingLeft: "32px",
-                  paddingRight: "32px"
-                }} onClick={executeTransaction}><b>Execute Transaction</b></Button>
-              </div>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodesConnectable={true}
+          defaultViewport={{ zoom: 1, x: 0, y: 0 }}
+          nodeTypes={nodeTypes}
+          edgesFocusable={true}
+        >
+          <Background />
+          <Controls position="bottom-left" />
+          <Panel position="top-left"><SidebarTrigger /></Panel>
+          {showSummary && (
+            <Panel  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm"> 
+              <TransactionSummary nodes={nodes} sequence={sequence} />
             </Panel>
-            {nodes.length == 0 && <ViewportPortal>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center whitespace-normal p-4 max-w-sm break-words text-muted-foreground text-xl">
-                Get started by searching for on-chain transactions or selecting components from the left sidebar
-              </div>
-            </ViewportPortal>}
-          </ReactFlow>
+          )}
+          <Panel position="top-right">
+            <div className="flex">
+              <ConnectButton style={{
+                fontSize: "14px",
+                marginRight: "16px"
+              }}> Connect Wallet </ConnectButton>
+              <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button" style={{
+                borderRadius: "16px",
+                height: "48px",
+                paddingLeft: "32px",
+                paddingRight: "32px"
+              }} onClick={executeTransaction}><b>Execute Transaction</b></Button>
+            </div>
+          </Panel>
+          <Panel position="bottom-right">
+            <Button
+              variant="outline"
+              style={{
+                fontSize: "14px"
+              }}
+              onClick={() => setShowSummary(!showSummary)}
+            >
+              {showSummary ? "Hide Summary" : "View Summary"}
+            </Button>
+          </Panel>
+          {nodes.length == 0 && <ViewportPortal>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center whitespace-normal p-4 max-w-sm break-words text-muted-foreground text-xl">
+              Get started by searching for on-chain transactions or selecting components from the left sidebar
+            </div>
+          </ViewportPortal>}
+        </ReactFlow>
       </div>
     </>
   );
