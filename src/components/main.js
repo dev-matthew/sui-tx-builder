@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { blocks } from "@/components/blocks";
 import EmptyNode from "@/components/nodes/EmptyNode";
 import { useToast } from "@/components/hooks/use-toast";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, FilePlus2 } from "lucide-react";
 import { ToastAction } from "@/components/ui/toast"
 
 import {
@@ -235,7 +235,7 @@ export default function Main() {
   };
 
   const getTypeAndInput = (inputs, input) => {
-    if ("Input" in input) {
+    if (typeof input === "object" && input !== null && "Input" in input) {
       let index = input["Input"]
       let input_obj = inputs[index];
       let returnValue = [undefined, "Unknown"];
@@ -370,9 +370,17 @@ export default function Main() {
             }
             break;
           case "MergeCoins":
+            let isGas2 = typeof func[id][0] == "string";
+            let backwardEdgesList2;
+            if (isGas2) {
+              backwardEdgesList2 = getBackwardEdges(func[id][1]);
+            } else {
+              backwardEdgesList2 = getBackwardEdges(func[id][1], func[id][0], "destination");
+            }
             customData = {
-              destinationCoin: getTypeAndInput(inputs, func[id][0])[1],
-              sourceCoins: func[id][1].map(item => getTypeAndInput(inputs, item)[1])
+              destinationCoin: isGas2 ? func[id][0] : getTypeAndInput(inputs, func[id][0])[1],
+              sourceCoins: func[id][1].map(item => getTypeAndInput(inputs, item)[1]),
+              backwardEdges: backwardEdgesList2
             }
             break;
           case "MakeMoveVec":
@@ -461,12 +469,12 @@ export default function Main() {
       }
 
       // Check if it's gas coin
-      if (value.toLowerCase() == "tx.gas" || value.toLowerCase() == "gascoin" || value.toLowerCase() == "gas") {
+      if (typeof value == 'string' && (value.toLowerCase() == "tx.gas" || value.toLowerCase() == "gascoin" || value.toLowerCase() == "gas")) {
         return tx.gas;
       }
 
       // Otherwise, switch on type
-      if (type == "object") {
+      if (type == "object" || type == "vector") {
         return tx.object(value);
       } else {
         return tx.pure(type, value);

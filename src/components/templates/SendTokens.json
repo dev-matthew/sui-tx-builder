@@ -1,0 +1,77 @@
+{
+    "result": {
+        "transaction": {
+            "data": {
+                "transaction": {
+                    "inputs": [
+                        {
+                            "type": "object",
+                            "objectId": "[Coin Object]"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "u64",
+                            "value": "1"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "u64",
+                            "value": "2"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "address",
+                            "value": "0xaddress1"
+                        },
+                        {
+                            "type": "pure",
+                            "valueType": "address",
+                            "value": "0xaddress2"
+                        }
+                    ],
+                    "transactions": [
+                        {
+                            "SplitCoins": [
+                                {
+                                    "Input": 0
+                                },
+                                [
+                                    {
+                                        "Input": 1
+                                    },
+                                    {
+                                        "Input": 2
+                                    }
+                                ]
+                            ]
+                        },
+                        {
+                            "TransferObjects": [
+                                [
+                                    {
+                                        "NestedResult": [0, 0]
+                                    }
+                                ],
+                                {
+                                    "Input": 3
+                                }
+                            ]
+                        },
+                        {
+                            "TransferObjects": [
+                                [
+                                    {
+                                        "NestedResult": [0, 1]
+                                    }
+                                ],
+                                {
+                                    "Input": 4
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -23,7 +23,7 @@
                     "transactions": [
                         {
                             "MoveCall": {
-                                "package": "0x2",
+                                "package": "0x5b45da03d42b064f5e051741b6fed3b29eb817c7923b83b92f37a1d2abf4fbab",
                                 "module": "nft",
                                 "function": "mint",
                                 "arguments": [

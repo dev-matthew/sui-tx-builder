@@ -27,7 +27,7 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
     setTransactionDigest(event.target.value);
   };
 
-  const handleSearchClick = async () => {
+  const handleSearchClick = async (saveTemplate = false) => {
     if (loading) {
       toast({
         title: `Search already in progress`,
@@ -51,8 +51,34 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
       if (data.result == null) {
         throw new Error(`Error: ${response.status}`);
       }
-      onSearch(data);
-      // maybe here we can also display stuff under the search bar about the transaction like state change, etc
+
+      if (saveTemplate) {
+        const localTemplates = localStorage.getItem("localTemplates");
+        let templates = localTemplates ? JSON.parse(localTemplates) : [];
+      
+        let name;
+        while (true) {
+          name = window.prompt("What should we call this template?");
+          if (name === null) return; // User cancelled
+      
+          const nameExists = templates.some(t => t.title === name);
+          if (!nameExists) break;
+      
+          alert("A template with that name already exists. Please choose a different name.");
+        }
+      
+        const new_template = {
+          title: name,
+          data: data
+        };
+      
+        templates.push(new_template);
+        localStorage.setItem("localTemplates", JSON.stringify(templates));
+      
+        alert("Successfully added template! Refresh the page to see it.");
+      } else {
+        onSearch(data);
+      }
     } catch (error) {
       toast({
         title: `Couldn't find ${transactionDigest}`,
@@ -102,6 +128,14 @@ export function AppSidebar({ onAddNode, onSearch, toast }) {
                   "Search"
                 )}
               </Button>
+            </div>
+            <div className="flex w-full max-w-sm items-center space-x-2">
+              <Button type="submit" className="bg-sui hover:bg-sui hover:brightness-110 execute-button ml-2 mt-2" style={{
+                  borderRadius: "8px",
+                  height: "36px",
+                  paddingLeft: "30px",
+                  paddingRight: "30px"
+              }} onClick={() => handleSearchClick(true)}>Create Local Template From Digest</Button>
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
