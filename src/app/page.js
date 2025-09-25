@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletProvider, SuiMainnetChain } from '@suiet/wallet-kit';
+import { WalletProvider, SuiMainnetChain, SlushWallet } from '@suiet/wallet-kit';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ReactFlowProvider } from '@xyflow/react';
 import { Toaster } from "@/components/ui/toaster";

@@ -126,7 +126,7 @@ Keep the response concise and user-friendly.`;
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Gemini API Error Response:', process.env.GEMINI_API_KEY, errorText);
+            console.error('Gemini API Error Response:', errorText);
             throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
         }
 
@@ -140,6 +140,6 @@ Keep the response concise and user-friendly.`;
         return data.candidates[0]?.content?.parts[0]?.text || 'Failed to generate LLM summary';
     } catch (error) {
         console.error('LLM summary generation failed:', error);
-        return `Failed to generate LLM summary: hello ${process.env.GEMINI_API_KEY} ${error.message}`;
+        return `Failed to generate LLM summary: ${error.message}`;
     }
 }

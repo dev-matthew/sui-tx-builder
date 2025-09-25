@@ -31,7 +31,7 @@ export function TransactionSummary({ nodes, sequence }) {
         setLoading(true);
         try {
             if (useLLM) {
-                const llmSummary = await generateLLMSummary(nodes, sequence, process.env.GEMINI_API_KEY);
+                const llmSummary = await generateLLMSummary(nodes, sequence);
                 setSummary(llmSummary);
             } else {
                 const presetSummary = generatePresetSummary(nodes, sequence);
