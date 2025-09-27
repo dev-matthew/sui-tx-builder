@@ -59,7 +59,7 @@ export function Templates({ onAddTemplate }) {
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
-                            {(localStorage.getItem("localTemplates") ? JSON.parse(localStorage.getItem("localTemplates")) : []).map((item2) => (
+                            {(typeof window !== "undefined" && localStorage.getItem("localTemplates") ? JSON.parse(localStorage.getItem("localTemplates")) : []).map((item2) => (
                                 <SidebarMenuItem key={item2.title}>
                                     <div className="flex items-center justify-between w-full">
                                     {/* Main Template Button */}
